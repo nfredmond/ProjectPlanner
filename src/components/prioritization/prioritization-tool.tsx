@@ -58,6 +58,9 @@ export default function PrioritizationTool({
   const [isMlLoading, setIsMlLoading] = useState(false);
   const [showMlScores, setShowMlScores] = useState(false);
   
+  // Add default tab state
+  const [activeTab, setActiveTab] = useState<string>('list');
+  
   // Initialize criteria weights based on original criteria
   useEffect(() => {
     const weights: Record<string, number> = {};
@@ -94,10 +97,11 @@ export default function PrioritizationTool({
         });
         
         setMlPredictions(predictionsMap);
-        setMlModelInfo(data.model);
+        setMlModelInfo(data.model_info);
       } catch (err: any) {
         console.error('Error fetching ML predictions:', err);
         setError(err.message || 'Error loading ML predictions');
+        setShowMlScores(false); // Turn off ML scores if there's an error
       } finally {
         setIsMlLoading(false);
       }
@@ -246,16 +250,27 @@ export default function PrioritizationTool({
         />
       )}
       
-      <Tabs defaultValue="list" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <div className="flex justify-between mb-4">
           <div className="flex space-x-4 items-center">
             <TabsList>
-              <TabsTrigger value="list" onClick={() => setView('list')} className="flex items-center gap-1">
-                <ListBulletIcon className="h-4 w-4" />
+              <TabsTrigger 
+                value="list" 
+                onClick={() => {
+                  setView('list');
+                  setActiveTab('list');
+                }}
+              >
+                <ListBulletIcon className="h-4 w-4 mr-1" />
                 List
               </TabsTrigger>
-              <TabsTrigger value="stats" className="flex items-center gap-1">
-                <ArrowsUpDownIcon className="h-4 w-4" />
+              <TabsTrigger 
+                value="stats"
+                onClick={() => {
+                  setActiveTab('stats');
+                }}
+              >
+                <ArrowsUpDownIcon className="h-4 w-4 mr-1" />
                 Stats
               </TabsTrigger>
             </TabsList>
