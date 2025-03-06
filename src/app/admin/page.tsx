@@ -3,6 +3,7 @@ import { createServerComponentClient } from '@/lib/supabase/server';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import UserManagement from '@/components/admin/user-management';
 import AgencySettings from '@/components/admin/agency-settings';
+import AgencyManagement from '@/components/admin/agency-management';
 import CriteriaManagement from '@/components/admin/criteria-management';
 import LlmConfiguration from '@/components/admin/llm-configuration';
 import AuditLogs from '@/components/admin/audit-logs';
@@ -36,9 +37,10 @@ export default async function AdminPage() {
   return (
     <div>
       <Tabs defaultValue="users" className="w-full">
-        <TabsList className="grid grid-cols-5 w-full mb-8">
+        <TabsList className="grid grid-cols-6 w-full mb-8">
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="agency">Agency Settings</TabsTrigger>
+          <TabsTrigger value="agencies">Agencies</TabsTrigger>
           <TabsTrigger value="criteria">Scoring Criteria</TabsTrigger>
           <TabsTrigger value="llm">LLM Configuration</TabsTrigger>
           <TabsTrigger value="audit">Audit Logs</TabsTrigger>
@@ -50,6 +52,10 @@ export default async function AdminPage() {
         
         <TabsContent value="agency" className="mt-0">
           <AgencySettings agency={profile.agencies[0]} />
+        </TabsContent>
+        
+        <TabsContent value="agencies" className="mt-0">
+          <AgencyManagement userAgencyId={profile.agency_id} />
         </TabsContent>
         
         <TabsContent value="criteria" className="mt-0">
