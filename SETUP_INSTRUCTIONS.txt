@@ -211,5 +211,125 @@ If you encounter issues during setup or deployment:
 - Monitor your OpenAI usage to manage costs
 - Back up your Supabase database regularly
 - Review user accounts and remove inactive users
+- For developers contributing to the codebase, refer to the BRANCHING_STRATEGY.md document for our git workflow guidelines
 
-For additional help or customization, consider contracting with a web developer familiar with Next.js and Supabase. 
+For additional help or customization, consider contracting with a web developer familiar with Next.js and Supabase.
+
+## Environment Variables Reference Guide
+
+The application requires several environment variables to function properly. This section provides detailed information about each variable and instructions for obtaining the correct values.
+
+### Supabase Configuration
+```
+# Replace with your actual Supabase project URL from Project Settings → API
+NEXT_PUBLIC_SUPABASE_URL=https://example.supabase.co
+
+# Replace with your actual anon key from Project Settings → API
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+
+# Replace with your actual service role key from Project Settings → API
+SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
+```
+* **NEXT_PUBLIC_SUPABASE_URL**: Your Supabase project URL (found in Project Settings → API)
+* **NEXT_PUBLIC_SUPABASE_ANON_KEY**: The public API key for authenticating with Supabase (found in Project Settings → API)
+* **SUPABASE_SERVICE_ROLE_KEY**: The admin-level API key for Supabase (found in Project Settings → API, keep this secure)
+
+### OpenAI Configuration
+```
+# Replace with your actual OpenAI API key from platform.openai.com
+OPENAI_API_KEY=your-openai-api-key
+
+# Current recommended model, no need to change
+OPENAI_MODEL=o3-mini
+```
+* **OPENAI_API_KEY**: Your API key from OpenAI (found in API Keys section of your OpenAI dashboard)
+* **OPENAI_MODEL**: The OpenAI model to use (default is o3-mini, which provides excellent performance for the cost)
+
+### Anthropic Configuration (Optional)
+```
+# Replace with your actual Anthropic API key if using Anthropic
+ANTHROPIC_API_KEY=your-anthropic-api-key
+
+# Current recommended model, no need to change
+ANTHROPIC_MODEL=claude-3.7-sonnet
+```
+* **ANTHROPIC_API_KEY**: Your API key from Anthropic (only needed if using Anthropic models)
+* **ANTHROPIC_MODEL**: The Anthropic model to use (default is claude-3.7-sonnet)
+
+### Mapbox Configuration
+```
+# Replace with your actual Mapbox access token
+NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=your-mapbox-access-token
+```
+* **NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN**: Your access token from Mapbox (found in your Mapbox account → Access tokens)
+
+### Application Configuration
+```
+# For local development, use localhost. For production, use your actual URL
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# Change to "production" for production deployment
+NODE_ENV=development
+```
+* **NEXT_PUBLIC_APP_URL**: The URL where your application is running (use localhost for local development)
+* **NODE_ENV**: The environment mode (development or production)
+
+### Email Configuration (Optional)
+```
+# Replace with your actual SMTP server host if using email features
+EMAIL_SERVER_HOST=smtp.example.com
+
+# Replace with your actual SMTP server port
+EMAIL_SERVER_PORT=587
+
+# Replace with your actual SMTP username
+EMAIL_SERVER_USER=your-email-username
+
+# Replace with your actual SMTP password
+EMAIL_SERVER_PASSWORD=your-email-password
+
+# Replace with your actual sender email address
+EMAIL_FROM=noreply@example.com
+```
+* **EMAIL_SERVER_HOST**: Your SMTP server hostname
+* **EMAIL_SERVER_PORT**: Your SMTP server port (commonly 587 or 465)
+* **EMAIL_SERVER_USER**: Username for SMTP authentication
+* **EMAIL_SERVER_PASSWORD**: Password for SMTP authentication
+* **EMAIL_FROM**: The email address that will appear as the sender
+
+### Security Configuration
+```
+# Replace with a secure random string (use https://generate-secret.vercel.app/32)
+NEXTAUTH_SECRET=your-nextauth-secret
+
+# For local development, use localhost. For production, use your actual URL
+NEXTAUTH_URL=http://localhost:3000
+```
+* **NEXTAUTH_SECRET**: A random string used to encrypt session cookies (generate using https://generate-secret.vercel.app/32)
+* **NEXTAUTH_URL**: The URL where your application is running (same as NEXT_PUBLIC_APP_URL)
+
+### Feature Flags
+```
+# Set to "false" to disable AI features if API keys aren't available
+ENABLE_LLM_FEATURES=true
+
+# Set to "false" to disable advanced mapping if Mapbox token isn't available
+ENABLE_ADVANCED_MAPPING=true
+```
+* **ENABLE_LLM_FEATURES**: Controls whether AI features are enabled
+* **ENABLE_ADVANCED_MAPPING**: Controls whether advanced mapping features are enabled
+
+### Troubleshooting Environment Variables
+
+If your application isn't working correctly:
+
+1. Check for typos in your environment variable names and values
+2. Ensure there are no extra spaces before or after values
+3. Verify that all required variables are set
+4. For local development, make sure your .env.local file is in the root directory
+5. For Vercel deployment, verify that all variables are added in the Vercel project settings
+
+For added security:
+- Never commit your .env file to version control
+- Regularly rotate API keys for production deployments
+- Use different API keys for development and production environments 

@@ -173,6 +173,8 @@ Set up mapping options in Admin > Map Settings:
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
+Before contributing, please review our [Branching Strategy](./BRANCHING_STRATEGY.md) document, which outlines our workflow for feature development, releases, and maintaining the portable app version.
+
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.

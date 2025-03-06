@@ -12,6 +12,47 @@ This quick start guide provides the essential steps to get the RTPA Project Prio
 4. **Vercel** (https://vercel.com) - Hosting (recommended)
 5. **Mapbox** (https://mapbox.com) - Advanced mapping (optional)
 
+## Required Environment Variables
+
+When deploying the application, you must configure these critical environment variables:
+
+### Essential Variables (Required)
+```
+# Supabase Configuration
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
+
+# Choose ONE AI Provider:
+# Option 1: OpenAI
+OPENAI_API_KEY=your-openai-api-key
+OPENAI_MODEL=o3-mini
+
+# Option 2: Anthropic (Optional alternative to OpenAI)
+ANTHROPIC_API_KEY=your-anthropic-api-key
+ANTHROPIC_MODEL=claude-3.7-sonnet
+
+# Security (Required)
+NEXTAUTH_SECRET=generate-a-random-string
+NEXTAUTH_URL=your-app-url
+```
+
+### Optional Variables
+```
+# Mapbox (for advanced mapping)
+NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=your-mapbox-access-token
+
+# Application Configuration
+NEXT_PUBLIC_APP_URL=same-as-nextauth-url
+NODE_ENV=development-or-production
+
+# Feature Flags
+ENABLE_LLM_FEATURES=true
+ENABLE_ADVANCED_MAPPING=true
+```
+
+For detailed information about each variable, see the "Environment Variables Reference Guide" section in SETUP_INSTRUCTIONS.txt.
+
 ## Deployment Options
 
 ### Option 1: Deploy to Vercel (Recommended for non-technical users)
@@ -74,5 +115,9 @@ This quick start guide provides the essential steps to get the RTPA Project Prio
 3. Set up scoring criteria
 4. Create user accounts for team members
 5. Start adding projects
+
+## Portable App Version
+
+A portable/offline version of the application is available for environments without continuous internet access. This version is maintained in the `portable-app` branch of the repository. For more information about this version and how it's maintained, refer to the BRANCHING_STRATEGY.md document.
 
 For technical assistance, please contact your IT department or consider hiring a developer for a few hours to help with setup. 
