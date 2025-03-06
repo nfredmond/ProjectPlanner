@@ -1,0 +1,165 @@
+# RTPA Project Prioritization Platform v0.1.0 - Troubleshooting Guide
+
+This guide addresses common issues you might encounter when setting up or using the RTPA Project Prioritization Platform.
+
+## Installation & Setup Issues
+
+### "npm command not found"
+- **Problem**: Node.js isn't installed correctly or not in your PATH
+- **Solution**: 
+  1. Download and reinstall Node.js from https://nodejs.org/en/download/
+  2. Choose the "Windows Installer" option and ensure you check "Add to PATH" during installation
+  3. Restart your computer after installation
+  4. Open a new Command Prompt window and try again
+
+### "git command not found"
+- **Problem**: Git isn't installed or not in your PATH
+- **Solution**:
+  1. Download and install Git from https://git-scm.com/downloads
+  2. During installation, select "Use Git from the Windows Command Prompt"
+  3. Restart your computer after installation
+
+### "Error: Cannot find module 'next'"
+- **Problem**: Dependencies aren't installed properly
+- **Solution**:
+  1. Make sure you're in the correct project directory
+  2. Run `npm install` again
+  3. If still failing, delete the `node_modules` folder and run `npm install` again
+
+## Supabase Issues
+
+### "Failed to connect to Supabase"
+- **Problem**: Incorrect credentials or connection details
+- **Solution**:
+  1. Check that your Supabase URL and keys in .env.local are correct
+  2. Verify that you've copied the full key without missing any characters
+  3. Ensure your Supabase project is active (check Supabase dashboard)
+
+### "Supabase permissions error"
+- **Problem**: Row-Level Security (RLS) policies not set up correctly
+- **Solution**:
+  1. In Supabase dashboard, go to Authentication → Policies
+  2. Ensure you've set up proper RLS policies as described in setup docs
+  3. Contact your IT support for assistance with database permissions
+
+## LLM API Issues
+
+### "OpenAI API error: insufficient_quota"
+- **Problem**: You've run out of OpenAI credits
+- **Solution**:
+  1. Check your account balance at https://platform.openai.com/account/billing/overview
+  2. Add more credits if needed
+  3. Consider adjusting application settings to use less expensive models or limit API usage
+
+### "OpenAI API error: invalid_api_key"
+- **Problem**: Your API key is incorrect or has been revoked
+- **Solution**:
+  1. Generate a new API key in OpenAI dashboard
+  2. Update your .env.local file with the new key
+  3. Redeploy your application if needed
+
+### "Anthropic API error: invalid_api_key"
+- **Problem**: Your Anthropic API key is incorrect or has been revoked
+- **Solution**:
+  1. Generate a new API key in the Anthropic dashboard
+  2. Update your .env.local file with the new key
+  3. Redeploy your application if needed
+
+### "Anthropic API error: quota_exceeded"
+- **Problem**: You've exceeded your Anthropic API usage limits
+- **Solution**:
+  1. Check your usage in the Anthropic dashboard
+  2. Upgrade your account if needed
+  3. Consider implementing rate limiting in your application
+
+### "Model not found" errors
+- **Problem**: The specified AI model doesn't exist or is mistyped
+- **Solution**:
+  1. Check your .env.local file for the correct model name
+     - For OpenAI, use `o3-mini`
+     - For Anthropic, use `claude-3.7-sonnet`
+  2. Update to the correct model name
+  3. Restart your application
+
+## Deployment Issues
+
+### Vercel deployment fails
+- **Problem**: Issues with your code or configuration
+- **Solution**:
+  1. Check Vercel deployment logs for specific errors
+  2. Ensure all environment variables are set correctly
+  3. If it mentions "build failed", there may be code issues - contact your IT department
+
+### "Application Error" when accessing the deployed site
+- **Problem**: Runtime error in the application
+- **Solution**:
+  1. Check logs in Vercel dashboard
+  2. Verify that all environment variables are set correctly
+  3. Make sure your Supabase project is running and accessible
+
+## User Management Issues
+
+### Can't create admin user
+- **Problem**: Database permissions or configuration issue
+- **Solution**:
+  1. Verify you can access the Supabase dashboard
+  2. Check that the "user_roles" table exists in your database
+  3. Manually insert a record in the "user_roles" table with your user ID and role="admin"
+
+### Users can't sign up
+- **Problem**: Authentication configuration issue
+- **Solution**:
+  1. Check Supabase authentication settings
+  2. Ensure "Email signup" is enabled in Supabase dashboard → Authentication → Providers
+  3. Verify that your application domain is allowed in the "Site URL" settings
+
+## Application Performance Issues
+
+### Application is slow or unresponsive
+- **Problem**: Resource limitations or network issues
+- **Solution**:
+  1. Check your Vercel plan limits
+  2. Consider upgrading to a paid plan for better performance
+  3. Optimize large images or files in your application
+
+### Maps not displaying correctly
+- **Problem**: Mapbox configuration or API key issues
+- **Solution**:
+  1. Verify your Mapbox API key is correct
+  2. Check that you're not exceeding Mapbox usage limits
+  3. Try switching to the free OpenStreetMap provider in application settings
+
+## Data Issues
+
+### Projects not saving correctly
+- **Problem**: Database write permissions or validation errors
+- **Solution**:
+  1. Check for validation errors in the form (red error messages)
+  2. Verify Supabase table permissions
+  3. Check browser console for error messages (press F12 → Console tab)
+
+### Can't upload files or images
+- **Problem**: Storage configuration or permissions
+- **Solution**:
+  1. Check Supabase storage bucket configuration
+  2. Verify file size limits (default is 2MB)
+  3. Ensure your storage bucket has proper permissions set
+
+## Getting Additional Help
+
+If you're still experiencing issues:
+
+1. Take screenshots of any error messages
+2. Note the exact steps that led to the problem
+3. Contact technical support with this information
+4. For urgent issues, consider hiring a developer familiar with Next.js and Supabase
+
+## Preventative Measures
+
+To avoid common issues:
+
+1. Regularly back up your Supabase database
+2. Monitor your OpenAI usage to avoid unexpected charges
+3. Keep your Node.js version updated
+4. Test major changes in a development environment before applying to production
+5. Document any custom configurations or modifications made to the system 

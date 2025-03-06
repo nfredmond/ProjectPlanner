@@ -1,0 +1,215 @@
+# RTPA Project Prioritization Platform v0.1.0 - Setup Instructions
+
+This document provides step-by-step instructions for setting up and deploying the RTPA Project Prioritization Platform. These instructions are designed for RTPA employees with minimal coding experience.
+
+## What You'll Need
+
+Before starting, you'll need to create accounts with these services:
+
+1. **Supabase** (https://supabase.com) - For the database, user authentication, and file storage
+   - Free tier is available for testing
+   - Production usage may require a paid plan (starting at $25/month)
+
+2. **OpenAI** (https://platform.openai.com) - For AI features like project recommendations and automated reporting
+   - Requires a paid account with credits (pay-as-you-go)
+   - Estimated monthly cost: $10-50 depending on usage
+   - o3-mini is the recommended model (excellent balance of performance and cost)
+
+3. **Anthropic** (https://anthropic.com) - Alternative LLM provider (optional)
+   - Claude 3.7 Sonnet model is the recommended option
+   - Requires a paid account with API access
+
+4. **GitHub** (https://github.com) - To access the code repository
+   - Free account is sufficient
+
+5. **Mapbox** (https://mapbox.com) - For advanced mapping features (optional)
+   - Free tier available for basic usage
+   - Paid plans for higher usage
+
+6. **Vercel** (https://vercel.com) - For hosting the application (recommended)
+   - Free tier available for testing
+   - Production usage requires a paid plan (starting at $20/month)
+
+## Step 1: Set Up Supabase
+
+1. Go to https://supabase.com and sign up for an account
+2. Create a new project with a name like "RTPA-Project-Planner"
+3. Choose a strong password for the database
+4. Select a region closest to your users (e.g., "West US" if in California)
+5. Wait for your project to be created (about 2 minutes)
+6. Once created, go to the "Project Settings" → "API" section
+7. Make note of the following information (you'll need it later):
+   - **Project URL** (looks like: https://abcdefghijklm.supabase.co)
+   - **anon public** key (a long string starting with "eyJhbGciOi...")
+   - **service_role** key (keep this one especially secure)
+
+8. Set up the database schema:
+   - Go to the "SQL Editor" section in Supabase
+   - Ask your IT department to help execute the SQL scripts from the project's `supabase/migrations` folder
+
+## Step 2: Set Up OpenAI or Anthropic
+
+### Option A: OpenAI
+1. Go to https://platform.openai.com and sign up for an account
+2. Add a payment method in the "Billing" section
+3. Go to "API Keys" and create a new secret key
+4. Copy this key and keep it secure (you'll need it later)
+5. Make sure you have sufficient credits in your account
+
+### Option B: Anthropic
+1. Go to https://anthropic.com and sign up for an account
+2. Request API access if not already available
+3. Generate an API key from your account dashboard
+4. Copy this key and keep it secure (you'll need it later)
+5. Make sure you have sufficient credits in your account
+
+## Step 3: Deploy Using Vercel (Easiest Method)
+
+1. Go to https://vercel.com and sign up using your GitHub account
+2. Click "Add New" → "Project"
+3. Connect to your GitHub account if prompted
+4. Find and select the RTPA Project Prioritization repository
+5. In the configuration screen:
+   - Leave most settings as default
+   - Expand "Environment Variables" section and add the following:
+
+     ```
+     NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
+     NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+     SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
+     OPENAI_API_KEY=your-openai-api-key
+     OPENAI_MODEL=o3-mini
+     # If using Anthropic instead of OpenAI, uncomment these lines:
+     # ANTHROPIC_API_KEY=your-anthropic-api-key
+     # ANTHROPIC_MODEL=claude-3.7-sonnet
+     NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=your-mapbox-access-token (if using Mapbox)
+     NEXT_PUBLIC_APP_URL=your-vercel-app-url (after deployment, update with the actual URL)
+     NEXTAUTH_SECRET=generate-a-random-string
+     NEXTAUTH_URL=your-vercel-app-url (after deployment, update with the actual URL)
+     ```
+
+6. Click "Deploy"
+7. Wait for deployment to complete (5-10 minutes)
+8. Once deployed, Vercel will provide you with a URL for your application (like https://rtpa-project-planner.vercel.app)
+9. Update the `NEXT_PUBLIC_APP_URL` and `NEXTAUTH_URL` environment variables with this URL
+
+## Step 4: Running Locally (Alternative Method)
+
+If you prefer to run the application on your own computer or server:
+
+1. Install prerequisites:
+   - **Node.js** (version 18 or higher): Download from https://nodejs.org/en/download/
+   - **Git**: Download from https://git-scm.com/downloads
+
+2. Open Command Prompt (Windows) or Terminal (Mac/Linux)
+
+3. Clone the repository:
+   ```
+   git clone https://github.com/your-org/rtpa-project-prioritization.git
+   cd rtpa-project-prioritization
+   ```
+
+4. Install dependencies:
+   ```
+   npm install
+   ```
+
+5. Create a `.env.local` file in the main folder and add the environment variables:
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+   SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
+   OPENAI_API_KEY=your-openai-api-key
+   OPENAI_MODEL=o3-mini
+   # If using Anthropic instead of OpenAI, uncomment these lines:
+   # ANTHROPIC_API_KEY=your-anthropic-api-key
+   # ANTHROPIC_MODEL=claude-3.7-sonnet
+   NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=your-mapbox-access-token
+   NEXT_PUBLIC_APP_URL=http://localhost:3000
+   NEXTAUTH_SECRET=generate-a-random-string
+   NEXTAUTH_URL=http://localhost:3000
+   ```
+
+6. Run the development server:
+   ```
+   npm run dev
+   ```
+
+7. Open http://localhost:3000 in your browser
+
+8. For production deployment, you'll need to:
+   ```
+   npm run build
+   npm run start
+   ```
+
+## Step 5: Initial Configuration
+
+After deploying the application:
+
+1. Create an admin account:
+   - Go to your deployed application URL
+   - Click "Sign Up" and create an account
+   - To make this account an admin, you'll need to update the user role in Supabase:
+     - Go to Supabase dashboard → Table editor → "auth.users"
+     - Find your user and note the "id"
+     - Create a record in the "user_roles" table with your user id and role="admin"
+
+2. Configure basic settings:
+   - Log in with your admin account
+   - Go to "Admin" → "Settings"
+   - Set up your organization's name, logo, and general preferences
+
+3. Set up scoring criteria:
+   - Go to "Admin" → "Scoring"
+   - Configure the criteria for evaluating projects
+   - Adjust weights for different criteria
+
+4. Set up user accounts:
+   - Go to "Admin" → "Users"
+   - Create accounts for other staff members
+   - Assign appropriate roles (admin, editor, viewer)
+
+## Troubleshooting Common Issues
+
+### Database Connection Issues
+- Check that your Supabase URL and keys are correct
+- Ensure your IP address isn't blocked in Supabase settings
+
+### OpenAI/Anthropic API Errors
+- Verify your API key is correct
+- Check your account has sufficient credits
+- Make sure you're using a supported model name
+  - For OpenAI: o3-mini is recommended
+  - For Anthropic: claude-3.7-sonnet is recommended
+
+### Application Not Loading
+- Check the deployment logs in Vercel
+- Ensure all environment variables are set correctly
+- Try clearing your browser cache
+
+## Getting Help
+
+If you encounter issues during setup or deployment:
+
+1. Contact your IT department for assistance
+2. Refer to the project documentation on GitHub
+3. Check Vercel and Supabase documentation for platform-specific issues
+4. Consider hiring a developer for a few hours to help with setup
+
+## Security Considerations
+
+- Keep all API keys and passwords secure
+- Regularly rotate your API keys (every 3-6 months)
+- Set up proper authentication and authorization in Supabase
+- Regularly back up your database
+- Monitor usage to prevent unexpected charges
+
+## Ongoing Maintenance
+
+- Keep the application up to date by redeploying periodically
+- Monitor your OpenAI usage to manage costs
+- Back up your Supabase database regularly
+- Review user accounts and remove inactive users
+
+For additional help or customization, consider contracting with a web developer familiar with Next.js and Supabase. 

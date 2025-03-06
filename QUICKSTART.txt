@@ -1,0 +1,78 @@
+# RTPA Project Prioritization Platform v0.1.0 - Quick Start Guide
+
+This quick start guide provides the essential steps to get the RTPA Project Prioritization Platform up and running. For detailed instructions, refer to SETUP_INSTRUCTIONS.txt.
+
+## Required Accounts
+
+1. **Supabase** (https://supabase.com) - Database & authentication
+2. **OpenAI** (https://platform.openai.com) - AI features (o3-mini model recommended)
+   OR
+   **Anthropic** (https://anthropic.com) - Alternative AI features (Claude 3.7 Sonnet recommended)
+3. **GitHub** (https://github.com) - Code repository access
+4. **Vercel** (https://vercel.com) - Hosting (recommended)
+5. **Mapbox** (https://mapbox.com) - Advanced mapping (optional)
+
+## Deployment Options
+
+### Option 1: Deploy to Vercel (Recommended for non-technical users)
+
+1. Sign up on Vercel using your GitHub account
+2. Import the repository
+3. Configure environment variables:
+   - Basic Supabase, OpenAI/Anthropic, and application settings
+   - See SETUP_INSTRUCTIONS.txt for complete list
+4. Click Deploy
+5. Your app will be available at a Vercel-provided URL
+
+### Option 2: Deploy Locally (Windows PC)
+
+1. Install Node.js (v18+) and Git from their official websites
+2. Open Command Prompt as Administrator
+3. Run these commands:
+   ```
+   git clone https://github.com/your-org/rtpa-project-prioritization.git
+   cd rtpa-project-prioritization
+   npm install
+   ```
+4. Create a .env.local file with required environment variables
+5. Run the app:
+   ```
+   npm run dev
+   ```
+6. Access at http://localhost:3000
+
+### Option 3: Deploy to Your Own Server
+
+1. Set up a Windows server with Node.js installed
+2. Clone the repository and install dependencies
+3. Configure environment variables
+4. Build the production version:
+   ```
+   npm run build
+   ```
+5. Start the server:
+   ```
+   npm run start
+   ```
+6. Consider using a process manager like PM2:
+   ```
+   npm install -g pm2
+   pm2 start npm --name "rtpa-app" -- start
+   ```
+
+## Cost Estimates
+
+- **Supabase**: Free tier for testing, $25+/month for production
+- **OpenAI/Anthropic**: $10-50/month depending on usage
+- **Vercel**: Free tier for testing, $20+/month for production
+- **Mapbox**: Free tier available, pay-as-you-go for higher usage
+
+## Next Steps After Deployment
+
+1. Create an admin account
+2. Configure organization settings
+3. Set up scoring criteria
+4. Create user accounts for team members
+5. Start adding projects
+
+For technical assistance, please contact your IT department or consider hiring a developer for a few hours to help with setup. 
