@@ -1,4 +1,4 @@
-# RTPA Project Prioritization Platform v0.1.0 - Troubleshooting Guide
+# RTPA Project Prioritization Platform v0.2.0 - Troubleshooting Guide
 
 This guide addresses common issues you might encounter when setting up or using the RTPA Project Prioritization Platform.
 
@@ -154,6 +154,22 @@ If you're still experiencing issues:
 3. Contact technical support with this information
 4. For urgent issues, consider hiring a developer familiar with Next.js and Supabase
 
+## Git Workflow Issues
+
+### Merge conflicts when syncing branches
+- **Problem**: Conflicts arise when merging between branches
+- **Solution**:
+  1. Follow the branching strategy outlined in BRANCHING_STRATEGY.md
+  2. Regularly pull changes from parent branches to minimize conflicts
+  3. For complex conflicts, consider using a visual merge tool like VS Code or GitKraken
+
+### Portable app branch out of sync
+- **Problem**: The portable-app branch has diverged significantly from develop
+- **Solution**:
+  1. Follow the specific sync instructions in BRANCHING_STRATEGY.md
+  2. Consider involving an experienced developer for complex merges
+  3. Test thoroughly after merging to ensure portable-specific features still work
+
 ## Preventative Measures
 
 To avoid common issues:
@@ -162,4 +178,51 @@ To avoid common issues:
 2. Monitor your OpenAI usage to avoid unexpected charges
 3. Keep your Node.js version updated
 4. Test major changes in a development environment before applying to production
-5. Document any custom configurations or modifications made to the system 
+5. Document any custom configurations or modifications made to the system
+
+## Environment Variables Issues
+
+### "Error: Invalid environment variables" on startup
+- **Problem**: The application can't find required environment variables or they're formatted incorrectly
+- **Solution**:
+  1. Check that you have a `.env` file in the project root (or `.env.local` for local development)
+  2. Verify all required variables are set with proper values
+  3. Make sure there are no spaces before or after the values
+  4. Restart the application after making changes
+
+### Missing or invalid environment variables
+- **Problem**: Specific environment variables are missing or have invalid values
+- **Solution**: 
+  1. Check the following critical variables and ensure they have valid values:
+     - `NEXT_PUBLIC_SUPABASE_URL`: Should be a complete URL (e.g., https://abcdefghijklm.supabase.co)
+     - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Should be a long string starting with "eyJhbGciOi..."
+     - `SUPABASE_SERVICE_ROLE_KEY`: Should be a long string starting with "eyJhbGciOi..."
+     - `OPENAI_API_KEY`: Should be a string starting with "sk-..."
+     - `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN`: Should be a string starting with "pk.eyJ1..."
+     - `NEXTAUTH_SECRET`: Should be a random string with no spaces
+  2. For a complete reference of all environment variables, refer to the "Environment Variables Reference Guide" section in SETUP_INSTRUCTIONS.txt
+
+### "Environment variable not available on the client" errors
+- **Problem**: Trying to use server-side variables on the client
+- **Solution**:
+  1. Only variables prefixed with `NEXT_PUBLIC_` are available in the browser
+  2. Make sure you're using the correct prefix for variables that need to be accessed in frontend code
+  3. For security, keep sensitive keys like `OPENAI_API_KEY` and `SUPABASE_SERVICE_ROLE_KEY` as server-only variables (without the `NEXT_PUBLIC_` prefix)
+
+### Environment variables not showing up in Vercel deployment
+- **Problem**: Environment variables not being applied to your Vercel deployment
+- **Solution**:
+  1. Go to your Vercel project → Settings → Environment Variables
+  2. Check that all variables are added correctly
+  3. Make sure you've set the variables in the correct environment (Production, Preview, Development)
+  4. Redeploy your application after updating variables
+
+### Local development vs. production environment variables
+- **Problem**: Different environment needs for local vs. production
+- **Solution**:
+  1. For local development, use `.env.local` file
+  2. For production, set environment variables in your hosting platform (e.g., Vercel)
+  3. Consider using different values for:
+     - `NODE_ENV`: "development" for local, "production" for deployment
+     - `NEXT_PUBLIC_APP_URL`: "http://localhost:3000" for local, your actual domain for production
+     - `NEXTAUTH_URL`: Same as `NEXT_PUBLIC_APP_URL` 
