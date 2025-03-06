@@ -4,8 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "cross-env NODE_ENV=development next dev",
+    "setup-https": "node setup-https.js",
+    "dev:https": "npm run setup-https && cross-env NODE_ENV=development node server.js",
     "build": "cross-env NODE_ENV=production next build --no-lint",
     "start": "cross-env NODE_ENV=production next start",
+    "start:portable": "cross-env NODE_ENV=production PORTABLE_MODE=true node server.js",
+    "portable:setup": "node setup-portable.js",
+    "portable:build": "cross-env NODE_ENV=production PORTABLE_MODE=true next build --no-lint",
     "lint": "next lint",
     "format": "prettier --write .",
     "prepare": "husky install"
