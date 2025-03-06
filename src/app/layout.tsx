@@ -2,6 +2,7 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { Montserrat } from 'next/font/google';
+import Image from 'next/image';
 import { ModernNavbar } from '@/components/layout/modern-navbar';
 
 const montserrat = Montserrat({ 
@@ -37,9 +38,20 @@ export default function RootLayout({
           </main>
           <footer className="bg-white border-t border-gray-200 py-4">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <p className="text-center text-sm text-gray-500">
-                © {new Date().getFullYear()} RTPA Project Prioritization Platform
-              </p>
+              <div className="flex flex-col items-center">
+                <div className="mb-2">
+                  <Image 
+                    src="/Green DOT Logo - All Dark Gray Text.png" 
+                    alt="Company Logo" 
+                    width={120} 
+                    height={24} 
+                    className="object-contain"
+                  />
+                </div>
+                <p className="text-center text-sm text-gray-500">
+                  © {new Date().getFullYear()} RTPA Project Prioritization Platform
+                </p>
+              </div>
             </div>
           </footer>
         </div>
