@@ -392,3 +392,26 @@ async function getProviderForPurpose(purpose: string): Promise<LlmProvider> {
 export async function getAvailableModels(): Promise<LlmModelConfig[]> {
   return await getModelConfig();
 }
+
+/**
+ * Check if a model supports a specific capability
+ */
+export async function modelSupportsCapability(
+  modelName: string,
+  capability: string
+): Promise<boolean> {
+  const model = await getModelConfig(modelName);
+  if (!model) return false;
+  
+  return model.capabilities.includes(capability);
+}
+
+/**
+ * Get list of supported capabilities for a model
+ */
+export async function getModelCapabilities(modelName: string): Promise<string[]> {
+  const model = await getModelConfig(modelName);
+  if (!model) return [];
+  
+  return model.capabilities;
+}
