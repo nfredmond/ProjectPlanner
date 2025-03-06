@@ -75,15 +75,15 @@ export default async function DashboardPage() {
     .limit(5);
 
   // Calculate metrics from the fetched data
-  const projectCount = statusCounts ? statusCounts.reduce((sum, item) => sum + item.count, 0) : 0;
+  const projectCount = statusCounts ? statusCounts.reduce((sum: number, item: StatusCount) => sum + item.count, 0) : 0;
   
   // Get active project count
   const activeCount = statusCounts ? 
-    statusCounts.find(s => s.status === 'active')?.count || 0 : 0;
+    statusCounts.find((s: StatusCount) => s.status === 'active')?.count || 0 : 0;
     
   // Get completed project count
   const completedCount = statusCounts ? 
-    statusCounts.find(s => s.status === 'completed')?.count || 0 : 0;
+    statusCounts.find((s: StatusCount) => s.status === 'completed')?.count || 0 : 0;
     
   // Get total cost
   const totalCost = costData?.total_cost || 0;
@@ -92,7 +92,7 @@ export default async function DashboardPage() {
   const feedbackCount = recentFeedback?.length || 0;
   
   // Format currency for display
-  const formatCurrency = (amount) => {
+  const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
@@ -118,7 +118,7 @@ export default async function DashboardPage() {
           <HomeIcon className="h-8 w-8 text-rtpa-blue-500 mr-3" />
           <div>
             <h1 className="text-3xl font-bold font-heading text-gray-900">Dashboard</h1>
-            <p className="text-gray-600 mt-1 font-body">Overview of your agency's transportation projects</p>
+            <p className="text-gray-600 mt-1 font-body">Overview of your agency&apos;s transportation projects</p>
           </div>
         </div>
       </div>

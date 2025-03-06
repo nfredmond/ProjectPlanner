@@ -51,6 +51,7 @@ export default function PrioritizationTool({
   const [view, setView] = useState<'list' | 'grid'>('list');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loadingTimeout, setLoadingTimeout] = useState<NodeJS.Timeout | null>(null);
   
   // ML prediction state
   const [mlPredictions, setMlPredictions] = useState<Record<string, MlPrediction>>({});
@@ -60,6 +61,32 @@ export default function PrioritizationTool({
   
   // Add default tab state
   const [activeTab, setActiveTab] = useState<string>('list');
+  
+  // Add loading timeout effect
+  useEffect(() => {
+    if (loading) {
+      // Set a timeout to show an error if loading takes more than 10 seconds
+      const timeout = setTimeout(() => {
+        setError('Loading is taking longer than expected. There might be an issue with the data or connection.');
+        setLoading(false);
+      }, 10000); // 10 seconds
+      
+      setLoadingTimeout(timeout);
+    } else {
+      // Clear timeout if we're not loading
+      if (loadingTimeout) {
+        clearTimeout(loadingTimeout);
+        setLoadingTimeout(null);
+      }
+    }
+    
+    // Cleanup on unmount
+    return () => {
+      if (loadingTimeout) {
+        clearTimeout(loadingTimeout);
+      }
+    };
+  }, [loading]);
   
   // Initialize criteria weights based on original criteria
   useEffect(() => {
@@ -82,10 +109,22 @@ export default function PrioritizationTool({
         // Construct query params with current filters
         const statusParams = status.map(s => `status=${s}`).join('&');
         
-        const response = await fetch(`/api/projects/ml-predictions?${statusParams}`);
+        // Add timeout to the fetch request
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 seconds timeout
+        
+        const response = await fetch(`/api/projects/ml-predictions?${statusParams}`, {
+          signal: controller.signal,
+          headers: {
+            'Cache-Control': 'no-cache',
+          },
+        });
+        
+        clearTimeout(timeoutId);
         
         if (!response.ok) {
-          throw new Error('Failed to fetch ML predictions');
+          console.error('ML predictions API error:', response.status, response.statusText);
+          throw new Error(`Failed to fetch ML predictions: ${response.status} ${response.statusText}`);
         }
         
         const data = await response.json();
@@ -100,8 +139,17 @@ export default function PrioritizationTool({
         setMlModelInfo(data.model_info);
       } catch (err: any) {
         console.error('Error fetching ML predictions:', err);
-        setError(err.message || 'Error loading ML predictions');
-        setShowMlScores(false); // Turn off ML scores if there's an error
+        
+        // More specific error messages for different error types
+        if (err.name === 'AbortError') {
+          setError('ML predictions request timed out. Please try again later.');
+        } else if (err.message.includes('Failed to fetch')) {
+          setError('Network error while fetching ML predictions. Check your internet connection.');
+        } else {
+          setError(err.message || 'Error loading ML predictions');
+        }
+        
+        // Don't automatically turn off ML scores on error, let user decide
       } finally {
         setIsMlLoading(false);
       }
@@ -238,6 +286,25 @@ export default function PrioritizationTool({
   
   if (loading) {
     return <Loading message="Updating prioritization..." />;
+  }
+
+  // Add a condition to check if projects array is empty
+  if (projects.length === 0) {
+    return (
+      <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-200">
+        <div className="text-center">
+          <div className="text-gray-500 mb-4">No projects found with scores</div>
+          <p className="text-sm text-gray-400 mb-2">
+            This could be because:
+          </p>
+          <ul className="list-disc text-sm text-gray-400 list-inside mb-4">
+            <li>No projects have been scored yet</li>
+            <li>All projects are filtered out by your current filters</li>
+            <li>There was an error loading your projects</li>
+          </ul>
+        </div>
+      </div>
+    );
   }
 
   return (
