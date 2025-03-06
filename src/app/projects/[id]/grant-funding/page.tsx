@@ -2,6 +2,7 @@ import React from 'react';
 import { createServerComponentClient } from '@/lib/supabase-client';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { ArrowLeftIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
 import GrantAnalysisContainer from '@/components/projects/grant-analysis-container';
 
 export const revalidate = 0; // Disable caching for this page
@@ -34,7 +35,11 @@ export default async function GrantFundingPage({ params }: GrantFundingPageProps
   const { data: { session } } = await supabase.auth.getSession();
   
   if (!session) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="animate-pulse text-gray-500">Loading...</div>
+      </div>
+    );
   }
   
   // Fetch user's profile with agency details
@@ -45,7 +50,11 @@ export default async function GrantFundingPage({ params }: GrantFundingPageProps
     .single();
   
   if (!profile) {
-    return <div>Error loading profile</div>;
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-red-500">Error loading profile</div>
+      </div>
+    );
   }
   
   // Fetch project details
@@ -78,49 +87,58 @@ export default async function GrantFundingPage({ params }: GrantFundingPageProps
     .order('created_at', { ascending: false });
   
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <Link 
-            href={`/projects/${params.id}`} 
-            className="text-rtpa-blue-600 hover:text-rtpa-blue-800 text-sm"
-          >
-            ← Back to Project Details
-          </Link>
-          <h1 className="text-2xl font-semibold mt-2">
-            Grant Funding Analysis for {project.title}
-          </h1>
-          <p className="text-gray-500 mt-1">
-            Use AI to analyze this project for grant funding eligibility and competitiveness
-          </p>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mb-6">
+        <Link 
+          href={`/projects/${params.id}`} 
+          className="inline-flex items-center text-rtpa-blue-600 hover:text-rtpa-blue-800 text-sm font-medium transition-colors"
+        >
+          <ArrowLeftIcon className="h-4 w-4 mr-1" />
+          Back to Project Details
+        </Link>
+      </div>
+      
+      <div className="mb-8">
+        <div className="flex items-center mb-3">
+          <CurrencyDollarIcon className="h-8 w-8 text-rtpa-blue-500 mr-3" />
+          <div>
+            <h1 className="text-3xl font-bold font-heading text-gray-900">
+              Grant Funding Analysis
+            </h1>
+            <p className="text-gray-600 font-body">
+              Analyze {project.title} for grant funding eligibility and competitiveness
+            </p>
+          </div>
         </div>
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <GrantAnalysisContainer 
-            projectId={params.id} 
-            grantPrograms={grantPrograms || []} 
-            existingAnalyses={analyses || []} 
-          />
+          <div className="bg-white shadow-card rounded-xl border border-gray-100 p-6">
+            <GrantAnalysisContainer 
+              projectId={params.id} 
+              grantPrograms={grantPrograms || []} 
+              existingAnalyses={analyses || []} 
+            />
+          </div>
         </div>
         
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-semibold mb-4">About Grant Analysis</h2>
-            <p className="text-sm text-gray-600 mb-4">
+          <div className="bg-white shadow-card rounded-xl border border-gray-100 p-6">
+            <h2 className="text-lg font-semibold mb-4 font-heading text-gray-900">About Grant Analysis</h2>
+            <p className="text-sm text-gray-600 mb-4 font-body">
               This feature uses artificial intelligence to analyze your project against common grant funding criteria. 
               The analysis evaluates eligibility for various grant programs, highlights strengths and weaknesses, 
               and provides recommendations to improve competitiveness.
             </p>
-            <h3 className="text-md font-medium mt-4 mb-2">How it works:</h3>
-            <ol className="list-decimal list-inside text-sm text-gray-600 space-y-2">
+            <h3 className="text-md font-medium mt-4 mb-2 font-heading text-gray-800">How it works:</h3>
+            <ol className="list-decimal list-inside text-sm text-gray-600 space-y-2 font-body">
               <li>Select a specific grant program or run a general analysis</li>
               <li>AI reviews your project details against grant criteria</li>
               <li>Receive an analysis with scores, strengths, and recommendations</li>
               <li>Use insights to improve your project&apos;s funding competitiveness</li>
             </ol>
-            <p className="text-sm text-gray-500 mt-4 italic">
+            <p className="text-sm text-gray-500 mt-4 italic font-body">
               Note: Analysis is based on AI interpretation of project data and should be used as guidance, not as a 
               guarantee of funding success.
             </p>

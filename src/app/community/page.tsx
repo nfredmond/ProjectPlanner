@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { createServerComponentClient } from '@/lib/supabase/server';
 import { ProjectStatus } from '@/types';
+import { UsersIcon } from '@heroicons/react/24/outline';
 import CommunityFeaturedProjects from '@/components/community/featured-projects';
 import CommunityMapPreview from '@/components/community/map-preview';
 
@@ -40,12 +41,21 @@ export default async function CommunityHomePage() {
     .eq('agency_id', defaultAgencyId);
   
   return (
-    <div className="space-y-12">
+    <div className="space-y-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Page Header */}
+      <div className="mb-8">
+        <div className="flex items-center mb-3">
+          <UsersIcon className="h-8 w-8 text-rtpa-green-500 mr-3" />
+          <h1 className="text-3xl font-bold font-heading text-gray-900">Community Engagement</h1>
+        </div>
+        <p className="text-gray-600 text-lg font-body">Provide feedback on transportation projects in your community</p>
+      </div>
+      
       {/* Hero Section */}
       <div className="relative">
         <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gray-100" />
         <div className="mx-auto">
-          <div className="relative shadow-xl sm:overflow-hidden rounded-2xl">
+          <div className="relative shadow-card sm:overflow-hidden rounded-xl border border-gray-100">
             <div className="absolute inset-0">
               <Image
                 className="h-full w-full object-cover"

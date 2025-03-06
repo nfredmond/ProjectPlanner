@@ -2,6 +2,8 @@ import React from 'react';
 import { notFound } from 'next/navigation';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
+import Link from 'next/link';
+import { ArrowLeftIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
 import GrantAnalysisContainer from '@/components/projects/grant-analysis-container';
 import { Metadata } from 'next';
 
@@ -44,17 +46,34 @@ export default async function GrantAnalysisPage({ params }: PageProps) {
     .order('created_at', { ascending: false });
   
   return (
-    <div className="container mx-auto py-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold mb-2">{project.name}</h1>
-        <p className="text-gray-600">Grant Analysis and Funding Opportunities</p>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mb-6">
+        <Link 
+          href={`/projects/${params.id}`} 
+          className="inline-flex items-center text-rtpa-blue-600 hover:text-rtpa-blue-800 text-sm font-medium transition-colors"
+        >
+          <ArrowLeftIcon className="h-4 w-4 mr-1" />
+          Back to Project
+        </Link>
       </div>
       
-      <GrantAnalysisContainer 
-        projectId={params.id} 
-        grantPrograms={grantPrograms || []}
-        existingAnalyses={existingAnalyses || []}
-      />
+      <div className="mb-8">
+        <div className="flex items-center mb-3">
+          <CurrencyDollarIcon className="h-8 w-8 text-rtpa-blue-500 mr-3" />
+          <div>
+            <h1 className="text-3xl font-bold font-heading text-gray-900">{project.title}</h1>
+            <p className="text-gray-600 font-body">Grant Analysis and Funding Opportunities</p>
+          </div>
+        </div>
+      </div>
+      
+      <div className="bg-white shadow-card rounded-xl border border-gray-100 p-6">
+        <GrantAnalysisContainer 
+          projectId={params.id} 
+          grantPrograms={grantPrograms || []}
+          existingAnalyses={existingAnalyses || []}
+        />
+      </div>
     </div>
   );
 } 
