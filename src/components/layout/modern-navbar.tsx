@@ -32,14 +32,14 @@ export function ModernNavbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16">
           {/* Logo - left aligned */}
-          <div className="flex-shrink-0 flex items-center">
+          <div className="flex-shrink-0 flex items-center -mt-0.5 -ml-1.5">
             <Link href="/" className="flex items-center">
               <div className="h-8 w-auto relative">
                 <Image 
                   src="/Green DOT Logo - Gray Text.png" 
                   alt="Company Logo" 
-                  width={160} 
-                  height={32} 
+                  width={156} 
+                  height={31} 
                   priority
                   className="object-contain"
                 />
