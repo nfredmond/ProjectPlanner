@@ -1,8 +1,21 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import { Montserrat } from 'next/font/google';
+import { ModernNavbar } from '@/components/layout/modern-navbar';
 
-const inter = Inter({ subsets: ['latin'] });
+const montserrat = Montserrat({ 
+  subsets: ['latin'],
+  variable: '--font-montserrat',
+  display: 'swap',
+  weight: ['400', '500', '600', '700'],
+});
+
+const inter = Inter({ 
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: 'RTPA Project Prioritization',
@@ -15,9 +28,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        {children}
+    <html lang="en" className="h-full">
+      <body className={`${montserrat.variable} ${inter.variable} font-sans antialiased h-full bg-gray-50`}>
+        <div className="min-h-screen flex flex-col">
+          <ModernNavbar />
+          <main className="flex-grow">
+            {children}
+          </main>
+          <footer className="bg-white border-t border-gray-200 py-4">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <p className="text-center text-sm text-gray-500">
+                © {new Date().getFullYear()} RTPA Project Prioritization Platform
+              </p>
+            </div>
+          </footer>
+        </div>
       </body>
     </html>
   );
