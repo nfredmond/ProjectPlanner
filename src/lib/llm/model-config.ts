@@ -1,12 +1,33 @@
 /**
  * LLM Model Configuration
  * 
- * This module provides configuration details for supported LLM models,
- * including their capabilities, context sizes, and costs.
+ * This module manages model configurations for all the supported LLM providers.
+ * It handles default model selections and capabilities.
  */
 
 import { LlmModelConfig, LlmProvider } from './service';
 import { createAdminClient } from '../../lib/supabase-client';
+
+// Cache for model configurations
+let modelConfigs: LlmModelConfig[] | null = null;
+
+/**
+ * Get the model configuration for a specific model
+ */
+export async function getModelConfig(modelName: string): Promise<LlmModelConfig | null> {
+  const configs = await getAvailableModelConfigs();
+  return configs.find(config => config.name === modelName) || null;
+}
+
+/**
+ * Get all available model configurations
+ */
+export async function getAvailableModelConfigs(): Promise<LlmModelConfig[]> {
+  if (!modelConfigs) {
+    modelConfigs = getDefaultModelConfigs();
+  }
+  return modelConfigs;
+}
 
 /**
  * Get configuration for available LLM models
@@ -94,6 +115,38 @@ function getDefaultModelConfigs(): LlmModelConfig[] {
       contextSize: 4000,
       costPer1kTokens: 0.0002,
       capabilities: ['text_generation', 'instruction_following'],
+    },
+    
+    // Local LLM models through Ollama
+    {
+      name: 'llama3',
+      provider: 'local',
+      contextSize: 4000,
+      costPer1kTokens: 0,
+      capabilities: ['text_generation', 'instruction_following'],
+      defaultForTasks: ['analyze', 'generate-report'],
+    },
+    {
+      name: 'mistral',
+      provider: 'local',
+      contextSize: 8000,
+      costPer1kTokens: 0,
+      capabilities: ['text_generation', 'instruction_following'],
+    },
+    {
+      name: 'gemma',
+      provider: 'local',
+      contextSize: 4000, 
+      costPer1kTokens: 0,
+      capabilities: ['text_generation', 'instruction_following'],
+    },
+    {
+      name: 'phi3',
+      provider: 'local',
+      contextSize: 2000,
+      costPer1kTokens: 0,
+      capabilities: ['text_generation', 'instruction_following'],
+      defaultForTasks: ['summarize', 'classify'],
     },
   ];
 }
