@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
   HomeIcon,
@@ -33,8 +34,15 @@ export function ModernNavbar() {
           <div className="flex items-center">
             {/* Logo */}
             <Link href="/" className="flex-shrink-0 flex items-center">
-              <div className="h-8 w-8 bg-rtpa-blue-600 flex items-center justify-center rounded text-white font-bold">
-                R
+              <div className="h-8 w-auto relative">
+                <Image 
+                  src="/Green DOT Logo - Gray Text.png" 
+                  alt="Company Logo" 
+                  width={160} 
+                  height={32} 
+                  priority
+                  className="object-contain"
+                />
               </div>
               <span className="ml-2 text-gray-900 font-medium hidden md:block">RTPA Prioritization</span>
             </Link>
