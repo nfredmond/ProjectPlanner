@@ -2,6 +2,7 @@ import React from 'react';
 import { createServerComponentClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { ArrowLeftIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
 import ProjectDetailTabs from '@/components/projects/project-detail-tabs';
 import ProjectDetailHeader from '@/components/projects/project-detail-header';
 import ProjectDetailSidebar from '@/components/projects/project-detail-sidebar';
@@ -36,7 +37,11 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   const { data: { session } } = await supabase.auth.getSession();
   
   if (!session) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="animate-pulse text-gray-500">Loading...</div>
+      </div>
+    );
   }
   
   // Fetch user's profile with agency details
@@ -47,7 +52,11 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
     .single();
   
   if (!profile) {
-    return <div>Error loading profile</div>;
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-red-500">Error loading profile</div>
+      </div>
+    );
   }
   
   // Fetch project details
@@ -86,36 +95,41 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
     .order('created_at', { ascending: false });
   
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center space-x-4">
-          <Link 
-            href="/projects" 
-            className="text-rtpa-blue-600 hover:text-rtpa-blue-800 text-sm"
-          >
-            ← Back to Projects
-          </Link>
-        </div>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mb-6">
+        <Link 
+          href="/projects" 
+          className="inline-flex items-center text-rtpa-blue-600 hover:text-rtpa-blue-800 text-sm font-medium transition-colors"
+        >
+          <ArrowLeftIcon className="h-4 w-4 mr-1" />
+          Back to Projects
+        </Link>
       </div>
       
-      <ProjectDetailHeader project={project} profile={profile} />
+      <div className="bg-white shadow-card rounded-xl border border-gray-100 mb-6 p-6">
+        <ProjectDetailHeader project={project} profile={profile} />
+      </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <ProjectDetailTabs 
-            project={project} 
-            criteria={criteria || []} 
-            projectScores={projectScores || []} 
-            feedback={projectFeedback || []}
-            profile={profile}
-          />
+          <div className="bg-white shadow-card rounded-xl border border-gray-100">
+            <ProjectDetailTabs 
+              project={project} 
+              criteria={criteria || []} 
+              projectScores={projectScores || []} 
+              feedback={projectFeedback || []}
+              profile={profile}
+            />
+          </div>
         </div>
         
         <div className="lg:col-span-1">
-          <ProjectDetailSidebar 
-            project={project} 
-            scores={projectScores || []}
-          />
+          <div className="bg-white shadow-card rounded-xl border border-gray-100 p-5">
+            <ProjectDetailSidebar 
+              project={project} 
+              scores={projectScores || []}
+            />
+          </div>
         </div>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { createServerComponentClient } from '@/lib/supabase/server';
 import Link from 'next/link';
+import { ChartBarIcon, DocumentChartBarIcon, PlusIcon } from '@heroicons/react/24/outline';
 import PrioritizationTool from '@/components/projects/prioritization-tool';
 
 export const metadata = {
@@ -19,7 +20,11 @@ export default async function PrioritizationPage({
   const { data: { session } } = await supabase.auth.getSession();
   
   if (!session) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="animate-pulse text-gray-500">Loading...</div>
+      </div>
+    );
   }
   
   // Fetch user's profile with agency details
@@ -30,7 +35,11 @@ export default async function PrioritizationPage({
     .single();
   
   if (!profile) {
-    return <div>Error loading profile</div>;
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-red-500">Error loading profile</div>
+      </div>
+    );
   }
   
   // Parse search parameters
@@ -87,66 +96,47 @@ export default async function PrioritizationPage({
     : [];
   
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Project Prioritization</h1>
-          <p className="text-gray-500 mt-1">Compare and rank transportation projects</p>
-        </div>
-        
-        <div className="flex space-x-3">
-          <Link 
-            href="/reports/projects/prioritization" 
-            className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rtpa-blue-500"
-          >
-            <svg
-              className="-ml-1 mr-2 h-5 w-5 text-gray-500"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              />
-            </svg>
-            Generate Report
-          </Link>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center mb-4 sm:mb-0">
+            <ChartBarIcon className="h-8 w-8 text-rtpa-blue-500 mr-3" />
+            <div>
+              <h1 className="text-3xl font-bold font-heading text-gray-900">Project Prioritization</h1>
+              <p className="text-gray-600 mt-1 font-body">Compare and rank transportation projects</p>
+            </div>
+          </div>
           
-          <Link 
-            href="/projects/new" 
-            className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-rtpa-blue-600 hover:bg-rtpa-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rtpa-blue-500"
-          >
-            <svg
-              className="-ml-1 mr-2 h-5 w-5"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+          <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
+            <Link 
+              href="/reports/projects/prioritization" 
+              className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rtpa-blue-500 transition-colors"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-              />
-            </svg>
-            Add Project
-          </Link>
+              <DocumentChartBarIcon className="h-5 w-5 mr-2 text-gray-500" />
+              Generate Report
+            </Link>
+            
+            <Link 
+              href="/projects/new" 
+              className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-rtpa-blue-600 hover:bg-rtpa-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rtpa-blue-500 transition-colors"
+            >
+              <PlusIcon className="h-5 w-5 mr-2" />
+              Add Project
+            </Link>
+          </div>
         </div>
       </div>
       
-      <PrioritizationTool 
-        projects={projects || []}
-        criteria={criteria || []} 
-        statusFilter={statusFilter}
-        categoryFilter={categoryFilter}
-        availableCategories={uniqueCategories}
-        highlightedProjectId={highlight}
-      />
+      <div className="bg-white shadow-card rounded-xl border border-gray-100">
+        <PrioritizationTool 
+          projects={projects || []}
+          criteria={criteria || []} 
+          statusFilter={statusFilter}
+          categoryFilter={categoryFilter}
+          availableCategories={uniqueCategories}
+          highlightedProjectId={highlight}
+        />
+      </div>
     </div>
   );
 }
