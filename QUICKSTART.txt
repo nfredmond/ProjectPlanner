@@ -1,6 +1,6 @@
 # RTPA Project Prioritization Platform v0.2.0 - Quick Start Guide
 
-This quick start guide provides the essential steps to get the RTPA Project Prioritization Platform up and running. For detailed instructions, refer to SETUP_INSTRUCTIONS.txt.
+This quick start guide provides the essential steps to get the RTPA Project Prioritization Platform up and running. For detailed instructions, refer to SETUP_INSTRUCTIONS.txt or DEV-SETUP.md.
 
 ## Required Accounts
 
@@ -127,4 +127,26 @@ For detailed information about each variable, see the "Environment Variables Ref
 
 A portable/offline version of the application is available for environments without continuous internet access. This version is maintained in the `portable-app` branch of the repository. For more information about this version and how it's maintained, refer to the BRANCHING_STRATEGY.md document.
 
-For technical assistance, please contact your IT department or consider hiring a developer for a few hours to help with setup. 
+For technical assistance, please contact your IT department or consider hiring a developer for a few hours to help with setup.
+
+## Development Environment
+
+For local development, use one of the following methods to start the development server:
+
+### Windows Command Prompt
+```
+.\start-dev.bat
+```
+
+### PowerShell
+```
+.\start-dev.ps1
+```
+Or if you encounter execution policy restrictions:
+```
+powershell -ExecutionPolicy Bypass -File .\start-dev.ps1
+```
+
+These scripts ensure the server starts from the correct directory, avoiding common "package.json not found" errors.
+
+For more details on development environment setup, see DEV-SETUP.md. 
