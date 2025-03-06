@@ -1,4 +1,4 @@
-# RTPA Project Prioritization Platform v0.1.0 - Troubleshooting Guide
+# RTPA Project Prioritization Platform v0.2.0 - Troubleshooting Guide
 
 This guide addresses common issues you might encounter when setting up or using the RTPA Project Prioritization Platform.
 

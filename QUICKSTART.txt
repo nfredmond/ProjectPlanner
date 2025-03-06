@@ -1,4 +1,4 @@
-# RTPA Project Prioritization Platform v0.1.0 - Quick Start Guide
+# RTPA Project Prioritization Platform v0.2.0 - Quick Start Guide
 
 This quick start guide provides the essential steps to get the RTPA Project Prioritization Platform up and running. For detailed instructions, refer to SETUP_INSTRUCTIONS.txt.
 
@@ -68,13 +68,20 @@ For detailed information about each variable, see the "Environment Variables Ref
 ### Option 2: Deploy Locally (Windows PC)
 
 1. Install Node.js (v18+) and Git from their official websites
+   - For Node.js: Choose the "Windows Installer" and check "Add to PATH" during installation
+   - For Git: Select "Use Git from the Windows Command Prompt" during installation
+
 2. Open Command Prompt as Administrator
+   - Search for "Command Prompt" in Start menu
+   - Right-click and select "Run as administrator"
+
 3. Run these commands:
    ```
    git clone https://github.com/your-org/rtpa-project-prioritization.git
    cd rtpa-project-prioritization
    npm install
    ```
+
 4. Create a .env.local file with required environment variables
 5. Run the app:
    ```

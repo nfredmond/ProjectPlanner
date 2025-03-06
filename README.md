@@ -1,4 +1,4 @@
-# RTPA Project Prioritization Platform v0.1.0
+# RTPA Project Prioritization Platform v0.2.0
 
 A comprehensive web application for Regional Transportation Planning Agencies (RTPAs) to manage, analyze, and prioritize transportation projects. This platform integrates advanced tools like Large Language Models (LLMs) for intelligent assistance, robust GIS mapping for spatial analysis, and data-driven scoring methodologies aligned with California and federal guidelines.
 
