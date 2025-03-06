@@ -14,25 +14,76 @@ export default async function PrioritizationPage({
 }: {
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
-  const supabase = await createServerComponentClient();
+  let supabase;
+  try {
+    supabase = await createServerComponentClient();
+  } catch (error) {
+    console.error('Supabase connection error:', error);
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] p-8">
+        <div className="text-red-500 text-lg font-semibold mb-2">Database Connection Error</div>
+        <div className="text-gray-700 text-center max-w-md">
+          <p className="mb-4">Unable to connect to the database. This is likely due to missing or incorrect Supabase credentials in the environment configuration.</p>
+          <p className="text-sm text-gray-500">Please check your .env file and ensure the following variables are correctly set:</p>
+          <ul className="text-sm text-gray-500 list-disc list-inside mt-2 mb-4">
+            <li>NEXT_PUBLIC_SUPABASE_URL</li>
+            <li>NEXT_PUBLIC_SUPABASE_ANON_KEY</li>
+            <li>SUPABASE_SERVICE_ROLE_KEY</li>
+          </ul>
+          <Link href="/" className="text-rtpa-blue-600 hover:underline">Return to Home</Link>
+        </div>
+      </div>
+    );
+  }
   
   // Get current user session
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+  
+  if (sessionError) {
+    console.error('Session error:', sessionError);
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] p-8">
+        <div className="text-red-500 text-lg font-semibold mb-2">Authentication Error</div>
+        <div className="text-gray-700 text-center max-w-md">
+          <p className="mb-4">There was a problem with your authentication session: {sessionError.message}</p>
+          <p className="text-sm text-gray-500 mb-4">Please try logging out and logging back in.</p>
+          <Link href="/login" className="text-rtpa-blue-600 hover:underline">Go to Login</Link>
+        </div>
+      </div>
+    );
+  }
   
   if (!session) {
+    console.warn('No active session found, redirecting to login page');
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="animate-pulse text-gray-500">Loading...</div>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] p-8">
+        <div className="text-red-500 text-lg font-semibold mb-2">Session Required</div>
+        <div className="text-gray-700 text-center max-w-md">
+          <p className="mb-4">You need to be logged in to access this page.</p>
+          <Link href="/login" className="text-rtpa-blue-600 hover:underline">Go to Login</Link>
+        </div>
       </div>
     );
   }
   
   // Fetch user's profile with agency details
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('*, agencies:agency_id(*)')
     .eq('id', session.user.id)
     .single();
+  
+  if (profileError) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] p-8">
+        <div className="text-red-500 text-lg font-semibold mb-2">Profile Error</div>
+        <div className="text-gray-700 text-center max-w-md">
+          <p className="mb-4">There was an error loading your profile: {profileError.message}</p>
+          <Link href="/" className="text-rtpa-blue-600 hover:underline">Return to Home</Link>
+        </div>
+      </div>
+    );
+  }
   
   if (!profile) {
     return (
