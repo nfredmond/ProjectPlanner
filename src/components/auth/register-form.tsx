@@ -17,6 +17,13 @@ const registerSchema = z.object({
   firstName: z.string().min(1, { message: 'First name is required' }),
   lastName: z.string().min(1, { message: 'Last name is required' }),
   agency: z.string().min(1, { message: 'Please select an agency' }),
+  newAgencyName: z.string().optional(),
+}).refine((data) => {
+  // If "new" agency is selected, newAgencyName must be provided
+  return data.agency !== 'new' || (data.newAgencyName && data.newAgencyName.trim().length > 0);
+}, {
+  message: "New organization name is required",
+  path: ["newAgencyName"],
 });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
@@ -32,6 +39,7 @@ export function RegisterForm() {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
   } = useForm<RegisterFormValues>();
 
   // Fetch agencies on component mount
@@ -61,6 +69,34 @@ export function RegisterForm() {
       setLoading(true);
       setError(null);
 
+      let agencyId: string | null = data.agency;
+      let newAgencyRequest = false;
+      let newAgencyName = '';
+      
+      // Check if user selected "create new organization"
+      if (data.agency === 'new' && data.newAgencyName) {
+        // Store the name for use in the profile metadata
+        newAgencyRequest = true;
+        newAgencyName = data.newAgencyName.trim();
+        
+        // For now, we'll assign to a special "pending" agency or the first available agency
+        // We won't create the agency here due to permission restrictions - admins will do this
+        const { data: firstAgency, error: agencyError } = await supabase
+          .from('agencies')
+          .select('id')
+          .limit(1)
+          .single();
+          
+        if (agencyError) {
+          // If we can't find any agency, we'll still allow registration
+          // but set agencyId to null - the admin will need to assign one later
+          console.error('Could not find a default agency:', agencyError);
+          agencyId = null;
+        } else {
+          agencyId = firstAgency.id;
+        }
+      }
+
       // 1. Register the user with Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: data.email,
@@ -69,6 +105,8 @@ export function RegisterForm() {
           data: {
             first_name: data.firstName,
             last_name: data.lastName,
+            new_agency_request: newAgencyRequest,
+            new_agency_name: newAgencyName,
           },
         },
       });
@@ -81,14 +119,40 @@ export function RegisterForm() {
         throw new Error('User registration failed');
       }
 
-      // 2. Create profile in the database
-      const { error: profileError } = await supabase.from('profiles').insert({
+      // 2. Create profile in the database with appropriate fields
+      const profileData: any = {
         id: authData.user.id,
-        agency_id: data.agency,
+        agency_id: agencyId,
         first_name: data.firstName,
         last_name: data.lastName,
         role: 'viewer', // Default role
-      });
+      };
+
+      // Add metadata if creating a new agency request
+      if (newAgencyRequest) {
+        // Check if the profiles table has a metadata column
+        try {
+          const { error: metadataCheckError } = await supabase
+            .from('profiles')
+            .select('metadata')
+            .limit(1);
+          
+          if (!metadataCheckError) {
+            // If no error, assume metadata column exists
+            profileData.metadata = {
+              new_agency_request: true,
+              new_agency_name: newAgencyName,
+              email: data.email // Include email in metadata for easier access
+            };
+          } else {
+            console.warn('Metadata column not found in profiles, storing request info in user_metadata');
+          }
+        } catch (e) {
+          console.warn('Error checking for metadata column:', e);
+        }
+      }
+
+      const { error: profileError } = await supabase.from('profiles').insert(profileData);
 
       if (profileError) {
         // If profile creation fails, we should clean up the auth user
@@ -97,7 +161,12 @@ export function RegisterForm() {
       }
 
       // Redirect to login page with success message
-      router.push('/login?registered=true');
+      // If they created a new agency, add a parameter to show a special message
+      if (newAgencyRequest) {
+        router.push('/login?registered=true&newAgency=true');
+      } else {
+        router.push('/login?registered=true');
+      }
     } catch (error: any) {
       setError(error.message || 'An error occurred during registration');
     } finally {
@@ -196,6 +265,7 @@ export function RegisterForm() {
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-rtpa-blue-500 focus:border-rtpa-blue-500 sm:text-sm"
             >
               <option value="">Select your agency</option>
+              <option value="new">-- Create New Organization --</option>
               {agencies.map((agency) => (
                 <option key={agency.id} value={agency.id}>
                   {agency.name}
@@ -206,6 +276,31 @@ export function RegisterForm() {
               <p className="mt-2 text-sm text-red-600">{errors.agency.message}</p>
             )}
           </div>
+
+          {/* New Organization Name field that appears when "Create New Organization" is selected */}
+          {watch('agency') === 'new' && (
+            <div>
+              <label htmlFor="newAgencyName" className="block text-sm font-medium text-gray-700">
+                New Organization Name
+              </label>
+              <input
+                id="newAgencyName"
+                type="text"
+                {...register('newAgencyName', { 
+                  required: watch('agency') === 'new',
+                  validate: value => 
+                    watch('agency') !== 'new' || 
+                    (value && value.trim().length > 0) || 
+                    'Organization name is required'
+                })}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-rtpa-blue-500 focus:border-rtpa-blue-500 sm:text-sm"
+                placeholder="Enter new organization name"
+              />
+              {errors.newAgencyName && (
+                <p className="mt-2 text-sm text-red-600">{errors.newAgencyName.message}</p>
+              )}
+            </div>
+          )}
         </div>
 
         <div>
