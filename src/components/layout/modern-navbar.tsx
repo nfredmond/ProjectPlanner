@@ -30,10 +30,10 @@ export function ModernNavbar() {
   return (
     <nav className="bg-white shadow-sm z-20 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex items-center">
-            {/* Logo */}
-            <Link href="/" className="flex-shrink-0 flex items-center">
+        <div className="flex h-16">
+          {/* Logo - left aligned */}
+          <div className="flex-shrink-0 flex items-center">
+            <Link href="/" className="flex items-center">
               <div className="h-8 w-auto relative">
                 <Image 
                   src="/Green DOT Logo - Gray Text.png" 
@@ -46,31 +46,31 @@ export function ModernNavbar() {
               </div>
               <span className="ml-2 text-gray-900 font-medium hidden md:block">RTPA Prioritization</span>
             </Link>
-            
-            {/* Desktop navigation */}
-            <div className="hidden md:ml-10 md:flex md:space-x-8">
-              {navigation.map((item) => {
-                const active = isActive(item.href);
-                return (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className={`inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2 transition-colors duration-200
-                      ${active 
-                        ? 'border-rtpa-blue-500 text-rtpa-blue-600' 
-                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                      }`}
-                  >
-                    <item.icon className={`mr-1 h-5 w-5 ${active ? 'text-rtpa-blue-500' : 'text-gray-400'}`} />
-                    {item.name}
-                  </Link>
-                );
-              })}
-            </div>
           </div>
           
-          {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
+          {/* Navigation - centered */}
+          <div className="hidden md:flex items-center justify-center flex-1 space-x-12">
+            {navigation.map((item) => {
+              const active = isActive(item.href);
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2 transition-colors duration-200
+                    ${active 
+                      ? 'border-rtpa-blue-500 text-rtpa-blue-600' 
+                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                    }`}
+                >
+                  <item.icon className={`mr-1 h-5 w-5 ${active ? 'text-rtpa-blue-500' : 'text-gray-400'}`} />
+                  {item.name}
+                </Link>
+              );
+            })}
+          </div>
+          
+          {/* Mobile menu button - right aligned */}
+          <div className="md:hidden flex items-center ml-auto">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="inline-flex items-center justify-center p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-rtpa-blue-500"
