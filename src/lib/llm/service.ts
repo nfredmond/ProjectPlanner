@@ -8,11 +8,12 @@
 import OpenAI from 'openai';
 import Anthropic from '@anthropic-ai/sdk';
 import { createLlamaClient, LlamaClient } from './llama-client';
+import { createLocalLlmClient, LocalLlmClient } from './local-llm-client';
 import { createCache } from './cache';
 import { getModelConfig } from './model-config';
 
 // LLM Provider Types
-export type LlmProvider = 'openai' | 'anthropic' | 'llama' | 'custom';
+export type LlmProvider = 'openai' | 'anthropic' | 'llama' | 'local' | 'custom';
 
 // LLM Request Interface
 export interface LlmRequest {
@@ -58,6 +59,11 @@ const anthropic = new Anthropic({
 const llamaClient = createLlamaClient({
   apiKey: process.env.LLAMA_API_KEY || '',
   baseUrl: process.env.LLAMA_API_URL || 'https://api.llama-api.com',
+});
+
+const localLlmClient = createLocalLlmClient({
+  apiUrl: process.env.LOCAL_LLM_API_URL || 'http://localhost:11434',
+  defaultModel: process.env.LOCAL_LLM_MODEL || 'llama3',
 });
 
 // Initialize cache
@@ -108,6 +114,9 @@ export async function getLlmResponse(
           break;
         case 'llama':
           response = await getLlamaResponse(request, model, temperature, max_tokens);
+          break;
+        case 'local':
+          response = await getLocalLlmResponse(request, model, temperature, max_tokens);
           break;
         default:
           throw new Error(`Unsupported LLM provider: ${provider}`);
@@ -311,6 +320,38 @@ async function getLlamaResponse(
 }
 
 /**
+ * Get a response from the local LLM through Ollama
+ */
+async function getLocalLlmResponse(
+  request: LlmRequest,
+  model: string,
+  temperature: number,
+  max_tokens: number
+): Promise<LlmResponse> {
+  // Build system prompt
+  const systemPrompt = request.system_message || 
+    'You are a helpful assistant for transportation planning professionals. Provide concise, accurate information about transportation projects.';
+  
+  // Call the local LLM through Ollama
+  const completion = await localLlmClient.generate({
+    prompt: request.prompt,
+    model,
+    system: systemPrompt,
+    temperature,
+    max_tokens,
+  });
+  
+  // Extract response
+  return {
+    text: completion.text,
+    model,
+    tokens_used: completion.usage?.total_tokens || 0,
+    created_at: new Date().toISOString(),
+    provider: 'local'
+  };
+}
+
+/**
  * Get the default model for a provider
  */
 function getDefaultModel(provider: LlmProvider): string {
@@ -318,11 +359,13 @@ function getDefaultModel(provider: LlmProvider): string {
     case 'openai':
       return 'gpt-4o';
     case 'anthropic':
-      return 'claude-3-opus-20240229';
+      return 'claude-3-sonnet-20240229';
     case 'llama':
-      return 'llama-3-70b-instruct';
+      return 'llama-3-8b-instruct';
+    case 'local':
+      return process.env.LOCAL_LLM_MODEL || 'llama3';
     default:
-      return 'gpt-4o';
+      return 'gpt-3.5-turbo'; // Fallback
   }
 }
 

@@ -27,6 +27,10 @@ if not exist "certificates\" (
     node setup-https.js
 )
 
+REM Check for Ollama and setup if needed
+echo Checking Ollama for local LLM support...
+node setup-ollama.js
+
 REM Build the app if not already built
 if not exist ".next\" (
     echo Building application for first use...
@@ -38,10 +42,17 @@ if not exist ".next\" (
     )
 )
 
+REM Start Ollama in the background
+echo Starting Ollama in the background...
+start /B "Ollama" "%~dp0\ollama\ollama.exe" serve
+
 REM Start the server in portable mode
 echo Starting portable app server...
 set NODE_ENV=production
 set PORTABLE_MODE=true
 npm run start
+
+REM When the app is shut down, shut down Ollama too
+taskkill /F /IM ollama.exe >nul 2>&1
 
 pause 

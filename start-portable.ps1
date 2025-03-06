@@ -26,6 +26,10 @@ if (-not (Test-Path "certificates")) {
     node setup-https.js
 }
 
+# Check for Ollama and setup if needed
+Write-Host "Checking Ollama for local LLM support..." -ForegroundColor Yellow
+node setup-ollama.js
+
 # Build the app if not already built
 if (-not (Test-Path ".next")) {
     Write-Host "Building application for first use..." -ForegroundColor Yellow
@@ -37,10 +41,19 @@ if (-not (Test-Path ".next")) {
     }
 }
 
+# Start Ollama in the background
+Write-Host "Starting Ollama in the background..." -ForegroundColor Green
+$ollamaPath = Join-Path -Path $PSScriptRoot -ChildPath "ollama\ollama.exe"
+Start-Process -FilePath $ollamaPath -ArgumentList "serve" -WindowStyle Hidden
+
 # Start the server in portable mode
 Write-Host "Starting portable app server..." -ForegroundColor Green
 $env:NODE_ENV = "production"
 $env:PORTABLE_MODE = "true"
 npm run start
+
+# When the app is shut down, shut down Ollama too
+Write-Host "Cleaning up..." -ForegroundColor Yellow
+Get-Process -Name "ollama" -ErrorAction SilentlyContinue | Stop-Process -Force
 
 Read-Host -Prompt "Press Enter to exit" 

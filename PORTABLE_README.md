@@ -13,6 +13,7 @@ This is the portable edition of the Project Planner application, designed to run
 3. The first run will:
    - Set up the local database
    - Configure self-signed certificates for HTTPS
+   - Install Ollama and download a local LLM model
    - Build the application
    - Start the server automatically
 4. Access the application at https://localhost:3000 in your browser
@@ -36,19 +37,43 @@ On first run, a default admin account is created:
 
 ## Features and Limitations
 
-The portable edition includes most core features but with some limitations:
+The portable edition includes most core features with a few limitations:
 
 ### Available Features
 - Project creation and management
 - Scoring and prioritization
 - Basic reporting
 - User management
+- Local LLM integration for AI features
 
 ### Limitations
-- No external LLM/AI features (OpenAI, Anthropic)
+- No connection to cloud APIs (OpenAI, Anthropic)
 - Limited mapping capabilities (no online maps)
 - No cloud storage for file attachments (files stored locally)
 - No email notifications
+- Local LLM may be slower and less capable than cloud models
+
+## AI Features with Local LLM
+
+The portable edition includes AI features powered by a local LLM through [Ollama](https://ollama.ai/). This allows you to use AI capabilities without requiring internet connectivity or API keys.
+
+Available AI features:
+- Project recommendations
+- Feedback analysis
+- Automated reporting
+- Context-aware search
+
+The default model is `llama3`, which offers a good balance of performance and resource usage. You can change the model in the `.env` file by modifying the `LOCAL_LLM_MODEL` setting.
+
+### Model Options
+
+Ollama supports several models that can be used with the portable app:
+- `llama3` - Default model, good all-around performance
+- `mistral` - Efficient model with good performance
+- `phi3` - Smaller model for lower-end computers
+- `gemma` - Another compact model option
+
+To change models, edit the `.env` file and modify `LOCAL_LLM_MODEL=llama3` to use your preferred model.
 
 ## Data Storage
 
@@ -77,6 +102,13 @@ To restore from backup:
 - The application uses self-signed certificates for HTTPS
 - Certificate warnings in the browser are normal and can be bypassed
 - If certificates are corrupted, delete the `certificates` folder and restart
+
+### LLM Features Not Working
+- Check that Ollama is running (should start automatically with the app)
+- Verify that `ENABLE_LLM_FEATURES=true` in your `.env` file
+- Ensure that `LLM_PROVIDER=local` in your `.env` file
+- Try manually starting Ollama: `.\ollama\ollama.exe serve`
+- Try a different model if the current one isn't working
 
 ### Database Errors
 - If the database becomes corrupted, you can reset it by:
