@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -10,12 +10,15 @@ import {
   ClipboardDocumentListIcon,
   UsersIcon,
   Bars3Icon,
-  XMarkIcon
+  XMarkIcon,
+  ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
 
 export function ModernNavbar() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const [hasImageError, setHasImageError] = useState(false);
 
   const navigation = [
     { name: 'Home', href: '/', icon: HomeIcon },
@@ -27,6 +30,18 @@ export function ModernNavbar() {
 
   const isActive = (path: string) => pathname === path;
 
+  useEffect(() => {
+    // Automatically retry loading the image if it fails once
+    if (hasImageError) {
+      const timer = setTimeout(() => {
+        setHasImageError(false);
+        setIsImageLoaded(false);
+      }, 3000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [hasImageError]);
+
   return (
     <nav className="bg-white shadow-sm z-20 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -35,14 +50,30 @@ export function ModernNavbar() {
           <div className="flex-shrink-0 flex items-center -mt-0.5 -ml-1.5">
             <Link href="/" className="flex items-center">
               <div className="h-8 w-auto relative">
-                <Image 
-                  src="/Green DOT Logo - Gray Text.png" 
-                  alt="Company Logo" 
-                  width={156} 
-                  height={31} 
-                  priority
-                  className="object-contain"
-                />
+                {!isImageLoaded && !hasImageError && (
+                  <div className="h-8 w-36 bg-gray-100 animate-pulse rounded"></div>
+                )}
+                
+                {hasImageError ? (
+                  <div className="h-8 w-36 flex items-center justify-center border border-gray-200 rounded bg-gray-50">
+                    <ExclamationTriangleIcon className="h-5 w-5 text-amber-500" />
+                    <span className="ml-1 text-xs text-gray-500">Logo Error</span>
+                  </div>
+                ) : (
+                  <Image 
+                    src="/Green DOT Logo - Gray Text.png" 
+                    alt="Company Logo" 
+                    width={156} 
+                    height={31} 
+                    priority
+                    className={`object-contain ${isImageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                    onLoad={() => setIsImageLoaded(true)}
+                    onError={() => {
+                      setIsImageLoaded(false);
+                      setHasImageError(true);
+                    }}
+                  />
+                )}
               </div>
               <span className="ml-2 text-gray-900 font-medium hidden md:block">RTPA Prioritization</span>
             </Link>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="300" height="80" viewBox="0 0 300 80" xmlns="http://www.w3.org/2000/svg">
+  <!-- Main logo container -->
+  <defs>
+    <linearGradient id="greenGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00c853" />
+      <stop offset="100%" stop-color="#009624" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Green DOT logo section -->
+  <g transform="translate(10, 15)">
+    <!-- Circle/Dot -->
+    <circle cx="30" cy="30" r="25" fill="url(#greenGradient)" />
+    
+    <!-- Road inside the circle -->
+    <path d="M15,30 L45,30" stroke="white" stroke-width="6" stroke-linecap="round" />
+    <circle cx="30" cy="30" r="15" fill="none" stroke="white" stroke-width="2" stroke-dasharray="3,3" />
+  </g>
+  
+  <!-- RTPA text -->
+  <g transform="translate(70, 47)">
+    <text font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#333333">
+      <tspan>RTPA</tspan>
+    </text>
+    <text font-family="Arial, sans-serif" font-size="18" font-weight="500" fill="#444444" x="0" y="22">
+      <tspan>Prioritization</tspan>
+    </text>
+  </g>
+</svg> 

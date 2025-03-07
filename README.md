@@ -9,8 +9,17 @@ A comprehensive web application for Regional Transportation Planning Agencies (R
 - [**SETUP_INSTRUCTIONS.txt**](./SETUP_INSTRUCTIONS.txt) - Detailed step-by-step instructions for deploying the platform
 - [**QUICKSTART.txt**](./QUICKSTART.txt) - Condensed guide with essential setup steps
 - [**TROUBLESHOOTING.txt**](./TROUBLESHOOTING.txt) - Solutions for common issues you might encounter
+- [**LOADING_TROUBLESHOOTING.md**](./LOADING_TROUBLESHOOTING.md) - Additional guidance for resolving loading issues
 
 These guides are specifically designed for users with minimal coding experience.
+
+## Database & Authentication
+
+The platform uses [Supabase](https://supabase.com) for its database, authentication, and storage needs. The application is pre-configured to work with a Supabase project at `https://bcwwhrfxvotfskqjqlrv.supabase.co`. You will need to:
+
+1. Obtain the API keys from your Supabase project dashboard
+2. Add these keys to your environment variables 
+3. See [SETUP_INSTRUCTIONS.txt](./SETUP_INSTRUCTIONS.txt) for detailed guidance
 
 ## Features
 
@@ -92,8 +101,17 @@ These guides are specifically designed for users with minimal coding experience.
    ```bash
    npm run dev
    ```
+   
+   Or use the provided scripts for easier startup:
+   ```bash
+   # For Windows Command Prompt
+   .\start-dev.bat
+   
+   # For PowerShell
+   .\start-dev.ps1
+   ```
 
-5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+5. Open [https://localhost:3000](https://localhost:3000) in your browser.
 
 ### Database Setup
 
@@ -168,6 +186,16 @@ Set up mapping options in Admin > Map Settings:
 - Default map center and zoom
 - Base layer selection
 - Custom overlay layers
+
+## Portable Application Version
+
+A portable/offline version of the application is available for environments without continuous internet access. This version:
+- Runs without cloud dependencies
+- Uses local LLM models through Ollama
+- Stores data in SQLite instead of Supabase
+- Works entirely offline after initial setup
+
+For detailed instructions on using the portable version, see [PORTABLE_README.md](./PORTABLE_README.md).
 
 ## Contributing
 

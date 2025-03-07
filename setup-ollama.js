@@ -7,9 +7,21 @@
 
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const { execSync, spawn } = require('child_process');
 const https = require('https');
 const { createWriteStream } = require('fs');
+const { isAdmin } = require('node-windows'); // If this fails, use the function below instead
+
+// Manual isAdmin check for Windows
+function checkAdminRights() {
+  try {
+    // Try to write to a protected location (this will fail if not admin)
+    execSync('net session >nul 2>&1');
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
 
 console.log('\n=============================================');
 console.log('Ollama Setup for ProjectPlanner Portable App');
@@ -22,13 +34,22 @@ const ollamaExe = path.join(ollamaDir, 'ollama.exe');
 const downloadPath = path.join(ollamaDir, 'ollama_installer.exe');
 
 // Create ollama directory if it doesn't exist
+console.log('Creating Ollama directory...');
 if (!fs.existsSync(ollamaDir)) {
-  console.log('Creating Ollama directory...');
-  fs.mkdirSync(ollamaDir, { recursive: true });
+  try {
+    fs.mkdirSync(ollamaDir, { recursive: true });
+  } catch (err) {
+    console.error(`Error creating Ollama directory: ${err.message}`);
+    console.log('Will attempt to continue...');
+  }
 }
 
 if (!fs.existsSync(ollamaModelsDir)) {
-  fs.mkdirSync(ollamaModelsDir, { recursive: true });
+  try {
+    fs.mkdirSync(ollamaModelsDir, { recursive: true });
+  } catch (err) {
+    console.error(`Error creating Ollama models directory: ${err.message}`);
+  }
 }
 
 // Function to download a file
@@ -38,6 +59,14 @@ function downloadFile(url, destination) {
     const file = createWriteStream(destination);
     
     https.get(url, (response) => {
+      if (response.statusCode === 302 || response.statusCode === 301) {
+        // Handle redirect
+        console.log(`Following redirect to ${response.headers.location}...`);
+        return downloadFile(response.headers.location, destination)
+          .then(resolve)
+          .catch(reject);
+      }
+      
       response.pipe(file);
       
       file.on('finish', () => {
@@ -59,6 +88,16 @@ function downloadFile(url, destination) {
 // Check if Ollama is already installed
 async function setupOllama() {
   try {
+    // Check for admin rights
+    const hasAdminRights = isAdmin || checkAdminRights();
+    
+    if (!hasAdminRights) {
+      console.log('\n⚠️ WARNING: This script is not running with administrator privileges.');
+      console.log('Installing Ollama may fail without admin rights.');
+      console.log('It is recommended to restart the script with "Run as administrator".');
+      console.log('\nAttempting to continue anyway...\n');
+    }
+    
     if (!fs.existsSync(ollamaExe)) {
       console.log('Ollama not found. Downloading Ollama...');
       
@@ -67,21 +106,57 @@ async function setupOllama() {
         fs.mkdirSync(ollamaDir, { recursive: true });
       }
       
-      // Download Ollama installer
-      await downloadFile('https://ollama.com/download/ollama-windows-amd64.exe', downloadPath);
-      
-      console.log('Installing Ollama (this may take a few minutes)...');
-      // Run the installer silently with the /S flag
-      execSync(`"${downloadPath}" /S /D=${ollamaDir}`, { stdio: 'inherit' });
-      
-      console.log('Ollama installation completed.');
-      
-      // Clean up the installer
-      if (fs.existsSync(downloadPath)) {
-        fs.unlinkSync(downloadPath);
+      try {
+        // Download Ollama installer
+        await downloadFile('https://ollama.com/download/ollama-windows-amd64.exe', downloadPath);
+        
+        console.log('Installing Ollama (this may take a few minutes)...');
+        // Try to run the installer silently with the /S flag
+        try {
+          execSync(`"${downloadPath}" /S /D=${ollamaDir}`, { stdio: 'inherit' });
+          console.log('Ollama installation completed.');
+        } catch (installError) {
+          console.error(`Error during silent installation: ${installError.message}`);
+          console.log('\nTrying alternative installation method...');
+          
+          // If silent install fails, try to run the installer directly
+          console.log('Please complete the Ollama installation wizard that will appear.');
+          console.log('After installation completes, come back to this window.');
+          
+          try {
+            execSync(`"${downloadPath}"`, { stdio: 'inherit' });
+            console.log('Manual installation completed. Continuing setup...');
+          } catch (manualInstallError) {
+            throw new Error(`Both installation methods failed. Error: ${manualInstallError.message}`);
+          }
+        }
+        
+        // Clean up the installer
+        if (fs.existsSync(downloadPath)) {
+          try {
+            fs.unlinkSync(downloadPath);
+          } catch (unlinkError) {
+            console.log(`Warning: Could not delete installer file: ${unlinkError.message}`);
+          }
+        }
+      } catch (downloadError) {
+        console.error(`Error downloading/installing Ollama: ${downloadError.message}`);
+        console.log('\nPlease install Ollama manually:');
+        console.log('1. Download from https://ollama.com/download');
+        console.log('2. Install Ollama');
+        console.log('3. Run: ollama pull llama3');
+        return;
       }
     } else {
       console.log('Ollama already installed.');
+    }
+    
+    // Check if Ollama is actually installed
+    if (!fs.existsSync(ollamaExe)) {
+      console.error('Ollama executable not found after installation attempt.');
+      console.log('You may need to install Ollama manually and copy it to:');
+      console.log(ollamaExe);
+      return;
     }
     
     // Download the model
@@ -107,14 +182,24 @@ async function setupOllama() {
     console.log(`Starting Ollama and pulling ${modelName} model...`);
     
     // Start Ollama server in background
-    const ollamaProcess = require('child_process').spawn(ollamaExe, ['serve'], {
-      detached: true,
-      stdio: 'ignore',
-      windowsHide: true
-    });
-    
-    // Let the server start up
-    await new Promise(resolve => setTimeout(resolve, 5000));
+    let ollamaProcess;
+    try {
+      ollamaProcess = spawn(ollamaExe, ['serve'], {
+        detached: true,
+        stdio: 'ignore',
+        windowsHide: true
+      });
+      
+      ollamaProcess.unref(); // Detach from parent process
+      
+      // Let the server start up
+      console.log('Waiting for Ollama server to start...');
+      await new Promise(resolve => setTimeout(resolve, 5000));
+    } catch (startError) {
+      console.error(`Error starting Ollama server: ${startError.message}`);
+      console.log('You may need to start Ollama manually before using LLM features.');
+      return;
+    }
     
     // Pull the model
     try {
