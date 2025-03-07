@@ -1,214 +1,205 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
-import { LlmSettings } from '@/types';
+import { validateRequest } from '@/lib/auth';
+import { createServerComponentClient } from '@/lib/supabase/server';
+import OpenAI from 'openai';
+import Anthropic from '@anthropic-ai/sdk';
+import { createLocalLlmClient } from '@/lib/llm/local-llm-client';
 
 export async function POST(request: NextRequest) {
   try {
-    // Get the current user from Supabase auth
-    const supabase = createRouteHandlerClient({ cookies });
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized: You must be logged in to test LLM connections' },
-        { status: 401 }
-      );
+    // Validate the request
+    const { session } = await validateRequest();
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     
-    // Get the user's profile to check if they're an admin
-    const { data: profile, error: profileError } = await supabase
+    // Get current user role
+    const supabase = await createServerComponentClient();
+    const { data: profile } = await supabase
       .from('profiles')
-      .select('role, agency_id')
-      .eq('id', user.id)
+      .select('role')
+      .eq('id', session.user.id)
       .single();
-    
-    if (profileError || !profile) {
+      
+    // Only admins can test LLM connections
+    if (!profile || profile.role !== 'admin') {
       return NextResponse.json(
-        { error: 'Unauthorized: User profile not found' },
-        { status: 401 }
-      );
-    }
-    
-    if (profile.role !== 'admin') {
-      return NextResponse.json(
-        { error: 'Forbidden: Only administrators can test LLM connections' },
+        { error: 'Unauthorized. Only admins can test LLM connections.' },
         { status: 403 }
       );
     }
     
-    // Parse the request body
-    const body = await request.json();
-    const { agencyId, config } = body;
+    const { provider, apiKey, model, prompt } = await request.json();
     
-    // Verify the user belongs to the agency they're trying to configure
-    if (profile.agency_id !== agencyId) {
-      return NextResponse.json(
-        { error: 'Forbidden: You can only configure your own agency' },
-        { status: 403 }
-      );
+    if (!provider) {
+      return NextResponse.json({ error: 'Provider is required' }, { status: 400 });
     }
     
-    // Test the LLM connection based on the provider
-    const result = await testLlmConnection(config);
+    if (!prompt) {
+      return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
+    }
     
-    return NextResponse.json(result);
+    switch (provider) {
+      case 'openai':
+        return await testOpenAI(apiKey, model, prompt);
+      
+      case 'anthropic':
+        return await testAnthropic(apiKey, model, prompt);
+      
+      case 'llama':
+        return await testLlama(apiKey, model, prompt);
+      
+      case 'local':
+        return await testLocal(model, prompt);
+      
+      default:
+        return NextResponse.json({ error: `Unsupported provider: ${provider}` }, { status: 400 });
+    }
+    
   } catch (error) {
-    console.error('Error testing LLM connection:', error);
+    console.error('Error testing LLM:', error);
     return NextResponse.json(
-      { error: `Failed to test LLM connection: ${(error as Error).message}` },
+      { 
+        error: 'Failed to test LLM connection', 
+        message: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     );
   }
 }
 
-async function testLlmConnection(config: LlmSettings) {
-  const { apiProvider, apiKey, apiEndpoint, model } = config;
-  
-  if (!apiKey) {
-    return { error: 'API key is required' };
-  }
-  
+async function testOpenAI(apiKey: string, model: string, prompt: string) {
   try {
-    // Simple test prompt
-    const prompt = "Respond with 'Connection successful!' if you can read this message.";
-    
-    // Handle different API providers
-    switch (apiProvider) {
-      case 'openai':
-        return await testOpenAI(apiKey, model, prompt);
-      
-      case 'azure':
-        if (!apiEndpoint) {
-          return { error: 'API endpoint is required for Azure OpenAI' };
-        }
-        return await testAzureOpenAI(apiKey, apiEndpoint, model, prompt);
-      
-      case 'anthropic':
-        return await testAnthropic(apiKey, model, prompt);
-      
-      case 'custom':
-        if (!apiEndpoint) {
-          return { error: 'API endpoint is required for custom providers' };
-        }
-        return { message: 'Custom provider connection test is not implemented yet' };
-      
-      default:
-        return { error: `Unsupported API provider: ${apiProvider}` };
+    if (!apiKey) {
+      return NextResponse.json({ error: 'OpenAI API key is required' }, { status: 400 });
     }
+    
+    const openai = new OpenAI({
+      apiKey: apiKey || process.env.OPENAI_API_KEY,
+    });
+    
+    const response = await openai.chat.completions.create({
+      model: model || 'gpt-4o',
+      messages: [{ role: 'user', content: prompt }],
+      max_tokens: 50
+    });
+    
+    return NextResponse.json({ 
+      message: response.choices[0]?.message?.content || 'No response content',
+      model: response.model
+    });
   } catch (error) {
-    console.error('Error in LLM test:', error);
-    return { error: `LLM test failed: ${(error as Error).message}` };
+    return NextResponse.json({ error: `OpenAI API error: ${(error as Error).message}` }, { status: 500 });
   }
 }
 
-async function testOpenAI(apiKey: string, model: string, prompt: string) {
+async function testAnthropic(apiKey: string, model: string, prompt: string) {
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    if (!apiKey) {
+      return NextResponse.json({ error: 'Anthropic API key is required' }, { status: 400 });
+    }
+    
+    const anthropic = new Anthropic({
+      apiKey: apiKey || process.env.ANTHROPIC_API_KEY || '',
+    });
+    
+    const response = await anthropic.messages.create({
+      model: model || 'claude-3-sonnet-20240229',
+      messages: [{ role: 'user', content: prompt }],
+      max_tokens: 50
+    });
+    
+    return NextResponse.json({ 
+      message: response.content[0]?.text || 'No response content',
+      model: response.model
+    });
+  } catch (error) {
+    return NextResponse.json({ error: `Anthropic API error: ${(error as Error).message}` }, { status: 500 });
+  }
+}
+
+async function testLlama(apiKey: string, model: string, prompt: string) {
+  try {
+    if (!apiKey) {
+      return NextResponse.json({ error: 'LLaMA API key is required' }, { status: 400 });
+    }
+    
+    // This is just a placeholder - in a real implementation, you would
+    // have an actual LLaMA API client here
+    const response = await fetch(process.env.LLAMA_API_URL || 'https://api.llama-api.com', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: model,
-        messages: [
-          { role: 'system', content: 'You are a helpful assistant.' },
-          { role: 'user', content: prompt }
-        ],
+        model: model || 'llama-3-8b-instruct',
+        prompt: prompt,
         max_tokens: 50
       })
     });
     
-    const data = await response.json();
-    
     if (!response.ok) {
-      return { error: data.error?.message || 'Unknown OpenAI API error' };
+      const error = await response.json();
+      return NextResponse.json({ error: error.message || 'LLaMA API error' }, { status: 500 });
     }
     
-    return { 
-      message: data.choices[0]?.message?.content || 'No response content',
-      model: data.model,
-      usage: data.usage
-    };
+    const data = await response.json();
+    
+    return NextResponse.json({ 
+      message: data.content || 'No response content',
+      model: model
+    });
   } catch (error) {
-    return { error: `OpenAI API error: ${(error as Error).message}` };
+    return NextResponse.json({ error: `LLaMA API error: ${(error as Error).message}` }, { status: 500 });
   }
 }
 
-async function testAzureOpenAI(apiKey: string, apiEndpoint: string, model: string, prompt: string) {
+async function testLocal(model: string, prompt: string) {
   try {
-    // Ensure the endpoint doesn't end with a slash
-    const endpoint = apiEndpoint.endsWith('/') 
-      ? apiEndpoint.slice(0, -1) 
-      : apiEndpoint;
+    const localClient = createLocalLlmClient({
+      apiUrl: process.env.LOCAL_LLM_API_URL || 'http://localhost:11434',
+      defaultModel: model || process.env.LOCAL_LLM_MODEL || 'llama3'
+    });
     
-    const deploymentName = model; // In Azure, the model is the deployment name
-    const apiVersion = '2023-05-15'; // Use the appropriate API version
-    
-    const response = await fetch(
-      `${endpoint}/openai/deployments/${deploymentName}/chat/completions?api-version=${apiVersion}`, 
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'api-key': apiKey
-        },
-        body: JSON.stringify({
-          messages: [
-            { role: 'system', content: 'You are a helpful assistant.' },
-            { role: 'user', content: prompt }
-          ],
+    try {
+      const response = await localClient.generate({
+        prompt: prompt,
+        model: model,
+        system: 'You are a helpful assistant. Respond briefly and concisely.',
+        max_tokens: 50
+      });
+      
+      return NextResponse.json({ 
+        message: response.text || 'No response content',
+        model: response.model
+      });
+    } catch (error) {
+      // If first attempt fails with specified model, try with a fallback model
+      console.error('Error with primary model, trying fallback:', error);
+      
+      try {
+        const fallbackResponse = await localClient.generate({
+          prompt: prompt,
+          model: 'phi3', // Try with a smaller model
+          system: 'You are a helpful assistant. Respond briefly and concisely.',
           max_tokens: 50
-        })
+        });
+        
+        return NextResponse.json({ 
+          message: fallbackResponse.text || 'No response content (fallback model)',
+          model: 'phi3 (fallback)',
+          warning: 'Used fallback model because the specified model failed.'
+        });
+      } catch (fallbackError) {
+        return NextResponse.json({ 
+          error: `Local LLM error: ${(fallbackError as Error).message}. Make sure Ollama is running.` 
+        }, { status: 500 });
       }
-    );
-    
-    const data = await response.json();
-    
-    if (!response.ok) {
-      return { error: data.error?.message || 'Unknown Azure OpenAI API error' };
     }
-    
-    return { 
-      message: data.choices[0]?.message?.content || 'No response content',
-      model: data.model,
-      usage: data.usage
-    };
   } catch (error) {
-    return { error: `Azure OpenAI API error: ${(error as Error).message}` };
-  }
-}
-
-async function testAnthropic(apiKey: string, model: string, prompt: string) {
-  try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: model,
-        messages: [
-          { role: 'user', content: prompt }
-        ],
-        max_tokens: 50
-      })
-    });
-    
-    const data = await response.json();
-    
-    if (!response.ok) {
-      return { error: data.error?.message || 'Unknown Anthropic API error' };
-    }
-    
-    return { 
-      message: data.content[0]?.text || 'No response content',
-      model: data.model
-    };
-  } catch (error) {
-    return { error: `Anthropic API error: ${(error as Error).message}` };
+    return NextResponse.json({ 
+      error: `Local LLM error: ${(error as Error).message}. Make sure Ollama is running.` 
+    }, { status: 500 });
   }
 } 

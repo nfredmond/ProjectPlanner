@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface LoadingProps {
   message?: string;
   fullScreen?: boolean;
   size?: 'small' | 'medium' | 'large';
+  timeout?: number;
 }
 
 /**
@@ -14,7 +15,19 @@ export function Loading({
   message = 'Loading...',
   fullScreen = false,
   size = 'medium',
+  timeout = 15000,
 }: LoadingProps) {
+  const [showTimeout, setShowTimeout] = useState(false);
+
+  useEffect(() => {
+    // Set a timeout to show fallback message if loading takes too long
+    const timer = setTimeout(() => {
+      setShowTimeout(true);
+    }, timeout);
+
+    return () => clearTimeout(timer);
+  }, [timeout]);
+
   // Calculate spinner size
   const spinnerSizeClasses = {
     small: 'h-4 w-4',
@@ -51,6 +64,16 @@ export function Loading({
           ></path>
         </svg>
         {message && <p className="mt-2 text-sm text-gray-500">{message}</p>}
+        
+        {showTimeout && (
+          <div className="mt-4 max-w-md text-center">
+            <p className="text-sm text-red-600 font-medium">Loading is taking longer than expected.</p>
+            <p className="text-xs text-gray-500 mt-1">
+              This could be due to network issues or configuration problems. 
+              Please check your connection and environment settings.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

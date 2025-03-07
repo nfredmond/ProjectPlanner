@@ -13,7 +13,10 @@
     "portable:build": "cross-env NODE_ENV=production PORTABLE_MODE=true next build --no-lint",
     "lint": "next lint",
     "format": "prettier --write .",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "verify-env": "node verify-environment.js",
+    "predev": "npm run verify-env",
+    "prebuild": "npm run verify-env"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.10.0",
@@ -44,9 +47,11 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^2.30.0",
+    "dotenv": "^16.4.7",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.477.0",
     "next": "^14.2.24",
+    "node-fetch": "^2.6.7",
     "openai": "^4.86.2",
     "react": "^18.2.0",
     "react-chartjs-2": "^5.2.0",
@@ -70,6 +75,7 @@
     "@types/react-dom": "^18.2.17",
     "@types/react-table": "^7.7.18",
     "autoprefixer": "^10.4.16",
+    "chalk": "^4.1.2",
     "cross-env": "^7.0.3",
     "eslint": "^8.54.0",
     "eslint-config-next": "14.0.3",

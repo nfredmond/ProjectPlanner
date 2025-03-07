@@ -33,19 +33,21 @@ Before starting, you'll need to create accounts with these services:
 ## Step 1: Set Up Supabase
 
 1. Go to https://supabase.com and sign up for an account
-2. Create a new project with a name like "RTPA-Project-Planner"
-3. Choose a strong password for the database
+2. Create a new project with a name like "ProjectPlanner"
+3. Choose a strong password for the database (e.g., "!wf35rUvtaMC#R&")
 4. Select a region closest to your users (e.g., "West US" if in California)
 5. Wait for your project to be created (about 2 minutes)
 6. Once created, go to the "Project Settings" → "API" section
-7. Make note of the following information (you'll need it later):
-   - **Project URL** (looks like: https://abcdefghijklm.supabase.co)
-   - **anon public** key (a long string starting with "eyJhbGciOi...")
-   - **service_role** key (keep this one especially secure)
+7. You should see the following information (or similar):
+   - **Project URL**: https://bcwwhrfxvotfskqjqlrv.supabase.co
+   - **anon public** key: starts with "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+   - **service_role** key: another key that starts with "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+   - **JWT Secret**: a long string used for authentication
 
 8. Set up the database schema:
    - Go to the "SQL Editor" section in Supabase
    - Ask your IT department to help execute the SQL scripts from the project's `supabase/migrations` folder
+   - Start with the 00001_initial_schema.sql file, then run each migration in numbered order
 
 ## Step 2: Set Up OpenAI or Anthropic
 
@@ -74,9 +76,10 @@ Before starting, you'll need to create accounts with these services:
    - Expand "Environment Variables" section and add the following:
 
      ```
-     NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
-     NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
-     SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
+     NEXT_PUBLIC_SUPABASE_URL=https://bcwwhrfxvotfskqjqlrv.supabase.co
+     NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key-from-api-section
+     SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key-from-api-section
+     NEXTAUTH_SECRET=your-jwt-secret-from-supabase
      OPENAI_API_KEY=your-openai-api-key
      OPENAI_MODEL=o3-mini
      # If using Anthropic instead of OpenAI, uncomment these lines:
@@ -84,7 +87,6 @@ Before starting, you'll need to create accounts with these services:
      # ANTHROPIC_MODEL=claude-3.7-sonnet
      NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=your-mapbox-access-token (if using Mapbox)
      NEXT_PUBLIC_APP_URL=your-vercel-app-url (after deployment, update with the actual URL)
-     NEXTAUTH_SECRET=generate-a-random-string
      NEXTAUTH_URL=your-vercel-app-url (after deployment, update with the actual URL)
      ```
 
@@ -121,18 +123,18 @@ If you prefer to run the application on your own Windows computer or server:
 
 5. Create a `.env.local` file in the main folder and add the environment variables:
    ```
-   NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
-   SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
+   NEXT_PUBLIC_SUPABASE_URL=https://bcwwhrfxvotfskqjqlrv.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key-from-api-section
+   SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key-from-api-section
+   NEXTAUTH_SECRET=your-jwt-secret-from-supabase
    OPENAI_API_KEY=your-openai-api-key
    OPENAI_MODEL=o3-mini
    # If using Anthropic instead of OpenAI, uncomment these lines:
    # ANTHROPIC_API_KEY=your-anthropic-api-key
    # ANTHROPIC_MODEL=claude-3.7-sonnet
    NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=your-mapbox-access-token
-   NEXT_PUBLIC_APP_URL=http://localhost:3000
-   NEXTAUTH_SECRET=generate-a-random-string
-   NEXTAUTH_URL=http://localhost:3000
+   NEXT_PUBLIC_APP_URL=https://localhost:3000
+   NEXTAUTH_URL=https://localhost:3000
    ```
 
 6. Run the development server:
@@ -140,7 +142,7 @@ If you prefer to run the application on your own Windows computer or server:
    npm run dev
    ```
 
-7. Open http://localhost:3000 in your browser
+7. Open https://localhost:3000 in your browser
 
 8. For production deployment, you'll need to:
    ```
@@ -227,13 +229,13 @@ The application requires several environment variables to function properly. Thi
 ### Supabase Configuration
 ```
 # Replace with your actual Supabase project URL from Project Settings → API
-NEXT_PUBLIC_SUPABASE_URL=https://example.supabase.co
+NEXT_PUBLIC_SUPABASE_URL=https://bcwwhrfxvotfskqjqlrv.supabase.co
 
 # Replace with your actual anon key from Project Settings → API
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key-from-api-section
 
 # Replace with your actual service role key from Project Settings → API
-SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
+SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key-from-api-section
 ```
 * **NEXT_PUBLIC_SUPABASE_URL**: Your Supabase project URL (found in Project Settings → API)
 * **NEXT_PUBLIC_SUPABASE_ANON_KEY**: The public API key for authenticating with Supabase (found in Project Settings → API)
@@ -271,7 +273,7 @@ NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=your-mapbox-access-token
 ### Application Configuration
 ```
 # For local development, use localhost. For production, use your actual URL
-NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_APP_URL=https://localhost:3000
 
 # Change to "production" for production deployment
 NODE_ENV=development
@@ -305,10 +307,10 @@ EMAIL_FROM=noreply@example.com
 ### Security Configuration
 ```
 # Replace with a secure random string (use https://generate-secret.vercel.app/32)
-NEXTAUTH_SECRET=your-nextauth-secret
+NEXTAUTH_SECRET=your-jwt-secret-from-supabase
 
 # For local development, use localhost. For production, use your actual URL
-NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_URL=https://localhost:3000
 ```
 * **NEXTAUTH_SECRET**: A random string used to encrypt session cookies (generate using https://generate-secret.vercel.app/32)
 * **NEXTAUTH_URL**: The URL where your application is running (same as NEXT_PUBLIC_APP_URL)

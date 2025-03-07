@@ -16,6 +16,19 @@ const nextConfig = {
   },
   // Increase timeout for static generation
   staticPageGenerationTimeout: 120,
+  // Disable telemetry for portable mode
+  telemetry: {
+    disabled: process.env.PORTABLE_MODE === 'true',
+  },
+  // Allow port configuration via env variable to avoid conflicts
+  port: process.env.PORT || 3000,
+  // Graceful shutdown on errors
+  onDemandEntries: {
+    // Keep pages in memory for 1 minute
+    maxInactiveAge: 60 * 1000,
+    // Maximum of 25 pages in memory
+    pagesBufferLength: 25,
+  },
   async headers() {
     return [
       {

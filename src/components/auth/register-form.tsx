@@ -108,11 +108,13 @@ export function RegisterForm() {
             new_agency_request: newAgencyRequest,
             new_agency_name: newAgencyName,
           },
+          emailRedirectTo: `${window.location.origin}/login?registered=true`,
         },
       });
 
       if (authError) {
-        throw authError;
+        console.error('Auth error:', authError);
+        throw new Error(authError.message || 'Failed to create account');
       }
 
       if (!authData.user) {
@@ -155,9 +157,16 @@ export function RegisterForm() {
       const { error: profileError } = await supabase.from('profiles').insert(profileData);
 
       if (profileError) {
+        console.error('Profile creation error:', profileError);
+        
+        // If the error is related to foreign key constraints, it might be an agency issue
+        if (profileError.message.includes('foreign key constraint')) {
+          throw new Error('Invalid agency selected. Please try again or contact support.');
+        }
+        
         // If profile creation fails, we should clean up the auth user
         // but Supabase doesn't provide an easy way to do this from the client
-        throw profileError;
+        throw new Error(profileError.message || 'Failed to create user profile');
       }
 
       // Redirect to login page with success message
@@ -169,6 +178,7 @@ export function RegisterForm() {
       }
     } catch (error: any) {
       setError(error.message || 'An error occurred during registration');
+      console.error('Registration error:', error);
     } finally {
       setLoading(false);
     }

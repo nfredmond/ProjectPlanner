@@ -20,8 +20,9 @@ Our repository maintains the following primary branches:
 
 ### 3. `portable-app` Branch
 - Specialized branch for the portable/offline version of the application
-- May contain specific modifications for standalone operation
+- Contains specific modifications for standalone operation (Ollama integration, SQLite support)
 - Periodically synced with `develop` branch
+- Extended with portable-specific features
 
 ## Workflow Guidelines
 
@@ -78,6 +79,7 @@ Our repository maintains the following primary branches:
    git checkout -b release/vX.Y.Z
    
    # Make any final version adjustments
+   # Update version in package.json, README.md, etc.
    git commit -m "Bump version to X.Y.Z"
    ```
 
@@ -121,6 +123,38 @@ Our repository maintains the following primary branches:
    # Resolve any conflicts
    git push origin portable-app
    ```
+
+3. **Portable App Release Process**
+   ```bash
+   # After syncing with develop and ensuring portable features work
+   git checkout portable-app
+   # Update version in portable-specific files
+   git commit -m "Prepare portable v0.2.0 release"
+   git tag -a portable-v0.2.0 -m "Portable Edition v0.2.0"
+   git push origin portable-app --tags
+   ```
+
+## Documentation Updates
+
+When making significant changes, ensure documentation is updated:
+
+1. **Identify Affected Documentation**
+   - README.md - Main project documentation
+   - QUICKSTART.txt - Condensed setup guide
+   - SETUP_INSTRUCTIONS.txt - Detailed setup
+   - TROUBLESHOOTING.txt - Common issues
+   - PORTABLE_README.md - Portable edition docs
+   - DEV-SETUP.md - Development environment
+
+2. **Make Documentation Changes**
+   - Update version numbers if applicable
+   - Add or modify feature documentation
+   - Update setup instructions if changed
+   - Add new troubleshooting steps if needed
+
+3. **Include Documentation in PRs**
+   - Documentation updates should be part of the same PR as code changes
+   - Reviewers should check documentation for accuracy
 
 ## Branch Naming Conventions
 

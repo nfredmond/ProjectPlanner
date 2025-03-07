@@ -5,9 +5,12 @@ This quick start guide provides the essential steps to get the RTPA Project Prio
 ## Required Accounts
 
 1. **Supabase** (https://supabase.com) - Database & authentication
+   - The project is configured to use https://bcwwhrfxvotfskqjqlrv.supabase.co by default
 2. **OpenAI** (https://platform.openai.com) - AI features (o3-mini model recommended)
    OR
    **Anthropic** (https://anthropic.com) - Alternative AI features (Claude 3.7 Sonnet recommended)
+   OR
+   **Local LLM** via Ollama - Offline AI features (no account required)
 3. **GitHub** (https://github.com) - Code repository access
 4. **Vercel** (https://vercel.com) - Hosting (recommended)
 5. **Mapbox** (https://mapbox.com) - Advanced mapping (optional)
@@ -18,22 +21,33 @@ When deploying the application, you must configure these critical environment va
 
 ### Essential Variables (Required)
 ```
-# Supabase Configuration
-NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
+# Database Configuration (Choose ONE)
+# Option 1: Supabase (Cloud) - Pre-configured values provided
+NEXT_PUBLIC_SUPABASE_URL=https://bcwwhrfxvotfskqjqlrv.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key-from-api-section
+SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key-from-api-section
+DATABASE_PROVIDER=supabase
+
+# Option 2: SQLite (Local/Offline)
+DATABASE_PROVIDER=sqlite
 
 # Choose ONE AI Provider:
 # Option 1: OpenAI
+LLM_PROVIDER=openai
 OPENAI_API_KEY=your-openai-api-key
 OPENAI_MODEL=o3-mini
 
-# Option 2: Anthropic (Optional alternative to OpenAI)
+# Option 2: Anthropic
+LLM_PROVIDER=anthropic
 ANTHROPIC_API_KEY=your-anthropic-api-key
 ANTHROPIC_MODEL=claude-3.7-sonnet
 
+# Option 3: Local LLM via Ollama
+LLM_PROVIDER=local
+LOCAL_LLM_MODEL=llama3
+
 # Security (Required)
-NEXTAUTH_SECRET=generate-a-random-string
+NEXTAUTH_SECRET=your-jwt-secret-from-supabase
 NEXTAUTH_URL=your-app-url
 ```
 
@@ -87,7 +101,19 @@ For detailed information about each variable, see the "Environment Variables Ref
    ```
    npm run dev
    ```
-6. Access at http://localhost:3000
+   Or for HTTPS (recommended):
+   ```
+   npm run dev:https
+   ```
+   Or use the provided scripts for easier startup:
+   ```
+   # For Windows Command Prompt
+   .\start-https.bat
+   
+   # For PowerShell
+   .\start-https.ps1
+   ```
+6. Access at https://localhost:3000
 
 ### Option 3: Deploy to Your Own Server
 
@@ -114,6 +140,7 @@ For detailed information about each variable, see the "Environment Variables Ref
 - **OpenAI/Anthropic**: $10-50/month depending on usage
 - **Vercel**: Free tier for testing, $20+/month for production
 - **Mapbox**: Free tier available, pay-as-you-go for higher usage
+- **Local LLM via Ollama**: Free, requires only local computing resources
 
 ## Next Steps After Deployment
 
@@ -125,9 +152,22 @@ For detailed information about each variable, see the "Environment Variables Ref
 
 ## Portable App Version
 
-A portable/offline version of the application is available for environments without continuous internet access. This version is maintained in the `portable-app` branch of the repository. For more information about this version and how it's maintained, refer to the BRANCHING_STRATEGY.md document.
+A portable/offline version of the application is available for environments without continuous internet access. This version:
+- Runs without cloud dependencies
+- Uses local LLM models through Ollama
+- Stores data in SQLite instead of Supabase
+- Works entirely offline after initial setup
+
+For detailed instructions on using the portable version, see PORTABLE_README.md.
 
 For technical assistance, please contact your IT department or consider hiring a developer for a few hours to help with setup.
+
+## Troubleshooting
+
+If you encounter any issues during setup or operation:
+1. Check TROUBLESHOOTING.txt for common issues and solutions
+2. For loading-specific problems, see LOADING_TROUBLESHOOTING.md
+3. Verify your environment variables are correctly set
 
 ## Development Environment
 
