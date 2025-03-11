@@ -97,76 +97,27 @@ export function RegisterForm() {
         }
       }
 
-      // 1. Register the user with Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
-        options: {
-          data: {
-            first_name: data.firstName,
-            last_name: data.lastName,
-            new_agency_request: newAgencyRequest,
-            new_agency_name: newAgencyName,
-          },
-          emailRedirectTo: `${window.location.origin}/login?registered=true`,
+      // Use server action instead of client-side auth
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          email: data.email,
+          password: data.password,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          agencyId: agencyId,
+          newAgencyRequest,
+          newAgencyName
+        }),
       });
 
-      if (authError) {
-        console.error('Auth error:', authError);
-        throw new Error(authError.message || 'Failed to create account');
-      }
+      const result = await response.json();
 
-      if (!authData.user) {
-        throw new Error('User registration failed');
-      }
-
-      // 2. Create profile in the database with appropriate fields
-      const profileData: any = {
-        id: authData.user.id,
-        agency_id: agencyId,
-        first_name: data.firstName,
-        last_name: data.lastName,
-        role: 'viewer', // Default role
-      };
-
-      // Add metadata if creating a new agency request
-      if (newAgencyRequest) {
-        // Check if the profiles table has a metadata column
-        try {
-          const { error: metadataCheckError } = await supabase
-            .from('profiles')
-            .select('metadata')
-            .limit(1);
-          
-          if (!metadataCheckError) {
-            // If no error, assume metadata column exists
-            profileData.metadata = {
-              new_agency_request: true,
-              new_agency_name: newAgencyName,
-              email: data.email // Include email in metadata for easier access
-            };
-          } else {
-            console.warn('Metadata column not found in profiles, storing request info in user_metadata');
-          }
-        } catch (e) {
-          console.warn('Error checking for metadata column:', e);
-        }
-      }
-
-      const { error: profileError } = await supabase.from('profiles').insert(profileData);
-
-      if (profileError) {
-        console.error('Profile creation error:', profileError);
-        
-        // If the error is related to foreign key constraints, it might be an agency issue
-        if (profileError.message.includes('foreign key constraint')) {
-          throw new Error('Invalid agency selected. Please try again or contact support.');
-        }
-        
-        // If profile creation fails, we should clean up the auth user
-        // but Supabase doesn't provide an easy way to do this from the client
-        throw new Error(profileError.message || 'Failed to create user profile');
+      if (!response.ok) {
+        throw new Error(result.error || 'Registration failed');
       }
 
       // Redirect to login page with success message

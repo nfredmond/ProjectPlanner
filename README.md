@@ -21,6 +21,18 @@ The platform uses [Supabase](https://supabase.com) for its database, authenticat
 2. Add these keys to your environment variables 
 3. See [SETUP_INSTRUCTIONS.txt](./SETUP_INSTRUCTIONS.txt) for detailed guidance
 
+### Authentication System
+
+The platform uses a secure authentication system built on Supabase Auth with Next.js server actions:
+
+- **User Management**: Create, edit, and manage user accounts with different permission levels
+- **Secure Cookie Handling**: Uses Next.js server actions to properly handle authentication cookies
+- **Password Reset**: Self-service password reset functionality for users
+- **Admin Tools**: Special tools for administrators to manage user accounts
+- **Documentation**: Comprehensive documentation in [docs/auth-system.md](./docs/auth-system.md)
+
+For resetting the admin superuser or troubleshooting authentication issues, see [docs/admin-reset.md](./docs/admin-reset.md).
+
 ## Features
 
 ### LLM-Powered Assistance

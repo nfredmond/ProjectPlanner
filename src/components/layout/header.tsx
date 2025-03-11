@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { UserProfile } from '@/types';
-import { createClientComponentClient } from '@/lib/supabase/client';
+import { signOut } from '@/lib/auth-actions';
 import {
   MagnifyingGlassIcon,
   ArrowRightOnRectangleIcon,
@@ -18,16 +18,10 @@ interface HeaderProps {
 
 export default function Header({ profile }: HeaderProps) {
   const router = useRouter();
-  const supabase = createClientComponentClient();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 
   const toggleProfileMenu = () => {
     setIsProfileMenuOpen(!isProfileMenuOpen);
-  };
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    router.push('/login');
   };
 
   const handleProfileClick = () => {
@@ -107,13 +101,15 @@ export default function Header({ profile }: HeaderProps) {
                     <Cog6ToothIcon className="mr-3 h-5 w-5 text-gray-500" />
                     Settings
                   </button>
-                  <button
-                    onClick={handleSignOut}
-                    className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    <ArrowRightOnRectangleIcon className="mr-3 h-5 w-5 text-gray-500" />
-                    Sign out
-                  </button>
+                  <form action={signOut}>
+                    <button
+                      type="submit"
+                      className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      <ArrowRightOnRectangleIcon className="mr-3 h-5 w-5 text-gray-500" />
+                      Sign out
+                    </button>
+                  </form>
                 </div>
               </div>
             )}
